@@ -38,8 +38,11 @@ O próprio GitHub compila o aplicativo:
 1. Abra a aba **Actions** deste repositório.
 2. Entre em **Android • Gerar APK**.
 3. Toque em **Run workflow**.
-4. Quando terminar, baixe o artefato **JChess-APK-v0.1.0**.
-5. Extraia o arquivo e instale `JChess-v0.1.0.apk`.
+4. Quando terminar, baixe o artefato **JChess-APK-v0.1.0-arm64**.
+5. Extraia o arquivo e instale `JChess-v0.1.0-arm64.apk`.
+
+O APK é ARM64 para não carregar três cópias gigantes do Stockfish. Essa é a
+arquitetura usada pela imensa maioria dos celulares Android atuais.
 
 Cada envio para a branch `main` também inicia uma compilação automaticamente.
 
