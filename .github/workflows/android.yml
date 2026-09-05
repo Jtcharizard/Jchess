@@ -38,6 +38,12 @@ jobs:
       - name: Baixar dependências
         run: flutter pub get
 
+      - name: Compatibilizar Stockfish com o Gradle atual
+        run: |
+          stockfish_gradle=$(find /home/runner/.pub-cache/hosted/pub.dev -path '*/stockfish-*/android/build.gradle' -print -quit)
+          test -n "$stockfish_gradle"
+          cp tool/stockfish_android.gradle "$stockfish_gradle"
+
       - name: Aplicar o ícone
         run: dart run flutter_launcher_icons
 
@@ -60,4 +66,3 @@ jobs:
           path: JChess-v0.1.0.apk
           retention-days: 30
           if-no-files-found: error
-
