@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jchess/app/app_controller.dart';
+import 'package:jchess/chess/game_models.dart';
 import 'package:jchess/main.dart';
 
 void main() {
@@ -11,5 +12,23 @@ void main() {
     expect(find.text('Nova partida'), findsOneWidget);
     expect(find.text('Aprender'), findsOneWidget);
   });
-}
 
+  testWidgets('mostra atalho para continuar a partida salva', (tester) async {
+    final controller = AppController();
+    await controller.saveActiveGame(
+      const GameConfig(
+        mode: GameMode.bot,
+        humanIsWhite: true,
+        botLevel: 4,
+        botId: 'ravi',
+      ),
+      const [],
+    );
+
+    await tester.pumpWidget(JChessApp(controller: controller));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Continuar partida'), findsOneWidget);
+    expect(find.textContaining('Ravi'), findsOneWidget);
+  });
+}

@@ -21,6 +21,14 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 14, 20, 110),
         children: [
           const _BrandHeader(),
+          if (app.activeGame != null) ...[
+            const SizedBox(height: 18),
+            _ResumeGameCard(
+              game: app.activeGame!,
+              onContinue: () => _resumeGame(context, app.activeGame!),
+              onDiscard: () => _discardGame(context),
+            ),
+          ],
           const SizedBox(height: 22),
           _PlayHero(
             onPlay: () => _openBotSetup(context),
@@ -124,6 +132,42 @@ class HomeScreen extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> _resumeGame(BuildContext context, SavedGame game) {
+    return Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => GameScreen(
+          config: game.config,
+          initialMoves: game.moves,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _discardGame(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Descartar partida?'),
+        content: const Text(
+          'A posição salva será apagada e não poderá ser continuada.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('Descartar'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && context.mounted) {
+      await context.app.clearActiveGame();
+    }
+  }
 }
 
 class _BrandHeader extends StatelessWidget {
@@ -178,7 +222,7 @@ class _BrandHeader extends StatelessWidget {
           onPressed: () => showAboutDialog(
             context: context,
             applicationName: 'JChess',
-            applicationVersion: '0.2.0',
+            applicationVersion: '0.3.0',
             applicationIcon: const Text('♞', style: TextStyle(fontSize: 42)),
             children: const [
               Text('Xadrez offline, educativo e personalizável.'),
@@ -202,63 +246,200 @@ class _PlayHero extends StatelessWidget {
       height: 270,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(28),
-        image: const DecorationImage(
-          image: AssetImage('assets/wallpapers/tokai_teio.jpg'),
-          fit: BoxFit.cover,
-          alignment: Alignment(0, -.18),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xFF26170F),
+            Color(0xFF7B3516),
+            Color(0xFFFF8A2A),
+          ],
         ),
         boxShadow: const [
           BoxShadow(color: Colors.black38, blurRadius: 22, offset: Offset(0, 12)),
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: DecoratedBox(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.transparent, Color(0xEB120D09)],
+      child: Stack(
+        children: [
+          const Positioned(
+            right: 16,
+            top: 5,
+            child: Text(
+              '♞',
+              style: TextStyle(
+                color: Color(0x33FFFFFF),
+                fontSize: 150,
+                height: 1,
+              ),
+            ),
           ),
+          Positioned(
+            right: -18,
+            top: -22,
+            child: Transform.rotate(
+              angle: -.12,
+              child: const _HeroMiniBoard(),
+            ),
+          ),
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Color(0x00120D09), Color(0xF2120D09)],
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(22),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: emberOrange,
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: const Text(
+                        'JOGAR AGORA',
+                        style: TextStyle(
+                          color: Color(0xFF23150A),
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: .7,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 9),
+                    const Text(
+                      'Bota o bot\nno lugar dele.',
+                      style: TextStyle(
+                        fontSize: 30,
+                        height: .98,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: onPlay,
+                        icon: const Icon(Icons.sports_esports_rounded),
+                        label: const Text('Nova partida'),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroMiniBoard extends StatelessWidget {
+  const _HeroMiniBoard();
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 168,
+      height: 168,
+      child: GridView.builder(
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.zero,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 4,
         ),
+        itemCount: 16,
+        itemBuilder: (_, index) {
+          final row = index ~/ 4;
+          final column = index % 4;
+          return ColoredBox(
+            color: (row + column).isEven
+                ? const Color(0x17FFFFFF)
+                : const Color(0x18000000),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _ResumeGameCard extends StatelessWidget {
+  const _ResumeGameCard({
+    required this.game,
+    required this.onContinue,
+    required this.onDiscard,
+  });
+
+  final SavedGame game;
+  final VoidCallback onContinue;
+  final VoidCallback onDiscard;
+
+  @override
+  Widget build(BuildContext context) {
+    final opponent = game.config.mode == GameMode.bot
+        ? botById(game.config.botId).name
+        : 'partida local';
+    final moveCount = game.moves.length;
+    final detail = moveCount == 0
+        ? 'Ainda sem lances'
+        : '$moveCount ${moveCount == 1 ? 'lance' : 'lances'} · último: ${game.moves.last.san}';
+
+    return Card(
+      color: const Color(0xFF332219),
+      child: InkWell(
+        onTap: onContinue,
+        borderRadius: BorderRadius.circular(24),
         child: Padding(
-          padding: const EdgeInsets.all(22),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.end,
+          padding: const EdgeInsets.fromLTRB(16, 15, 10, 15),
+          child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                width: 48,
+                height: 48,
                 decoration: BoxDecoration(
-                  color: emberOrange,
-                  borderRadius: BorderRadius.circular(999),
+                  color: emberOrange.withValues(alpha: .16),
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                child: const Text(
-                  'JOGAR AGORA',
-                  style: TextStyle(
-                    color: Color(0xFF23150A),
-                    fontSize: 11,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: .7,
-                  ),
+                alignment: Alignment.center,
+                child: const Icon(Icons.play_arrow_rounded, color: emberOrange),
+              ),
+              const SizedBox(width: 13),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Continuar partida',
+                      style: TextStyle(fontWeight: FontWeight.w900),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      'Contra $opponent · $detail',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: Colors.white60,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: 9),
-              const Text(
-                'Bota o bot\nno lugar dele.',
-                style: TextStyle(
-                  fontSize: 30,
-                  height: .98,
-                  fontWeight: FontWeight.w900,
-                ),
-              ),
-              const SizedBox(height: 14),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: onPlay,
-                  icon: const Icon(Icons.sports_esports_rounded),
-                  label: const Text('Nova partida'),
-                ),
+              IconButton(
+                tooltip: 'Descartar partida salva',
+                onPressed: onDiscard,
+                icon: const Icon(Icons.close_rounded),
               ),
             ],
           ),

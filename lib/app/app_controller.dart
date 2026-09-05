@@ -1,5 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../chess/game_models.dart';
 
 enum GameResult { win, draw, loss, local }
 
@@ -15,6 +19,7 @@ class AppController extends ChangeNotifier {
   static const _winsKey = 'wins';
   static const _drawsKey = 'draws';
   static const _lossesKey = 'losses';
+  static const _activeGameKey = 'activeGame';
 
   SharedPreferences? _preferences;
 
@@ -23,12 +28,13 @@ class AppController extends ChangeNotifier {
   String wallpaper = 'sunset';
   String? customWallpaperPath;
   int botLevel = 5;
-  String botId = 'brasa';
+  String botId = 'ravi';
   Set<int> completedLessons = <int>{};
   int games = 0;
   int wins = 0;
   int draws = 0;
   int losses = 0;
+  SavedGame? activeGame;
 
   Future<void> load() async {
     _preferences = await SharedPreferences.getInstance();
@@ -38,7 +44,7 @@ class AppController extends ChangeNotifier {
     wallpaper = preferences.getString(_wallpaperKey) ?? 'sunset';
     customWallpaperPath = preferences.getString(_customWallpaperKey);
     botLevel = preferences.getInt(_botLevelKey) ?? 5;
-    botId = preferences.getString(_botIdKey) ?? 'brasa';
+    botId = preferences.getString(_botIdKey) ?? 'ravi';
     completedLessons = preferences
             .getStringList(_completedLessonsKey)
             ?.map(int.tryParse)
@@ -49,6 +55,17 @@ class AppController extends ChangeNotifier {
     wins = preferences.getInt(_winsKey) ?? 0;
     draws = preferences.getInt(_drawsKey) ?? 0;
     losses = preferences.getInt(_lossesKey) ?? 0;
+    final savedGameJson = preferences.getString(_activeGameKey);
+    if (savedGameJson != null) {
+      try {
+        activeGame = SavedGame.fromJson(
+          Map<String, dynamic>.from(jsonDecode(savedGameJson) as Map),
+        );
+      } catch (_) {
+        activeGame = null;
+        await preferences.remove(_activeGameKey);
+      }
+    }
   }
 
   Future<void> setBoardTheme(String value) async {
@@ -96,6 +113,29 @@ class AppController extends ChangeNotifier {
       _completedLessonsKey,
       completedLessons.map((item) => '$item').toList()..sort(),
     );
+  }
+
+  Future<void> saveActiveGame(
+    GameConfig config,
+    List<PlayedMove> moves,
+  ) async {
+    activeGame = SavedGame(
+      config: config,
+      moves: List<PlayedMove>.unmodifiable(moves),
+      savedAt: DateTime.now(),
+    );
+    notifyListeners();
+    await _preferences?.setString(
+      _activeGameKey,
+      jsonEncode(activeGame!.toJson()),
+    );
+  }
+
+  Future<void> clearActiveGame() async {
+    if (activeGame == null) return;
+    activeGame = null;
+    notifyListeners();
+    await _preferences?.remove(_activeGameKey);
   }
 
   Future<void> recordGame(GameResult result) async {

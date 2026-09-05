@@ -14,16 +14,21 @@ import '../widgets/chess_board.dart';
 import 'analysis_screen.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({required this.config, super.key});
+  const GameScreen({
+    required this.config,
+    this.initialMoves = const <PlayedMove>[],
+    super.key,
+  });
 
   final GameConfig config;
+  final List<PlayedMove> initialMoves;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> {
-  final chesslib.Chess _game = chesslib.Chess();
+  late final chesslib.Chess _game;
   final StockfishService _engine = StockfishService();
   final List<PlayedMove> _moves = [];
 
@@ -42,10 +47,33 @@ class _GameScreenState extends State<GameScreen> {
   @override
   void initState() {
     super.initState();
+    _game = chesslib.Chess();
+    for (final savedMove in widget.initialMoves) {
+      final promotion = savedMove.uci.length > 4
+          ? savedMove.uci.substring(4, 5)
+          : 'q';
+      final restored = _game.move({
+        'from': savedMove.from,
+        'to': savedMove.to,
+        'promotion': promotion,
+      });
+      if (!restored) break;
+      _moves.add(savedMove);
+    }
+    if (_moves.isNotEmpty) {
+      _lastFrom = _moves.last.from;
+      _lastTo = _moves.last.to;
+    }
     _flipped = widget.config.mode == GameMode.bot
         ? !widget.config.humanIsWhite
         : false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _updateStatus();
+      if (!_finished) {
+        unawaited(context.app.saveActiveGame(widget.config, _moves));
+      }
+      setState(() {});
       if (_isBotTurn) _playBotMove();
     });
   }
@@ -369,6 +397,9 @@ class _GameScreenState extends State<GameScreen> {
     _hintFrom = null;
     _hintTo = null;
     _updateStatus();
+    if (!_finished) {
+      unawaited(context.app.saveActiveGame(widget.config, _moves));
+    }
     setState(() {});
 
     if (!_finished && _isBotTurn) {
@@ -456,6 +487,9 @@ class _GameScreenState extends State<GameScreen> {
       _finished = false;
       _updateStatus();
     });
+    if (!_finished) {
+      unawaited(context.app.saveActiveGame(widget.config, _moves));
+    }
   }
 
   void _updateStatus() {
@@ -478,6 +512,7 @@ class _GameScreenState extends State<GameScreen> {
   void _finish(String message, {bool? winnerIsWhite}) {
     _finished = true;
     _status = message;
+    unawaited(context.app.clearActiveGame());
     if (_resultRecorded) return;
     _resultRecorded = true;
 
