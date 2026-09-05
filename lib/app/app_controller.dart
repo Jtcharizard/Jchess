@@ -104,9 +104,9 @@ class AppController extends ChangeNotifier {
 class AppScope extends InheritedNotifier<AppController> {
   const AppScope({
     required AppController controller,
-    required Widget child,
-    Key? key,
-  }) : super(key: key, notifier: controller, child: child);
+    required super.child,
+    super.key,
+  }) : super(notifier: controller);
 
   static AppController of(BuildContext context) {
     final scope = context.dependOnInheritedWidgetOfExactType<AppScope>();

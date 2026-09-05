@@ -83,7 +83,6 @@ class StockfishService {
 
     final completer = Completer<EngineEvaluation>();
     _activeRequest = completer;
-    _engine.stdin = 'stop';
     _engine.stdin =
         'setoption name Skill Level value ${skillLevel.clamp(0, 20)}';
     _engine.stdin = 'position fen $fen';
