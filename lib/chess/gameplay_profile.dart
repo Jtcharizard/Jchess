@@ -237,9 +237,10 @@ GameplaySummary summarizeGameplay({
     }
 
     final movedPiece = _pieceAt(item.move.beforeFen, item.move.from);
-    if (movedPiece?.toLowerCase() == 'q' &&
+    final badQueenMove = movedPiece?.toLowerCase() == 'q' &&
         (item.quality == MoveQuality.mistake ||
-            item.quality == MoveQuality.blunder)) {
+            item.quality == MoveQuality.blunder);
+    if (badQueenMove && _queenLostOnReply(analysis, index, humanIsWhite)) {
       queenErrors++;
     }
     if (item.move.san.startsWith('O-O') || item.move.san.startsWith('0-0')) {
@@ -277,6 +278,25 @@ int _qualityPoints(MoveQuality quality) => switch (quality) {
       MoveQuality.mistake => 20,
       MoveQuality.blunder => 0,
     };
+
+bool _queenLostOnReply(
+  List<AnalyzedMove> analysis,
+  int moveIndex,
+  bool humanIsWhite,
+) {
+  if (moveIndex + 1 >= analysis.length) return false;
+  final move = analysis[moveIndex].move;
+  final reply = analysis[moveIndex + 1].move;
+  if (reply.whiteMoved == humanIsWhite) return false;
+  final queensAfterMove = _queenCount(move.afterFen, humanIsWhite);
+  final queensAfterReply = _queenCount(reply.afterFen, humanIsWhite);
+  return queensAfterMove > 0 && queensAfterReply < queensAfterMove;
+}
+
+int _queenCount(String fen, bool white) {
+  final target = white ? 'Q' : 'q';
+  return fen.split(' ').first.split('').where((piece) => piece == target).length;
+}
 
 bool _isEndgame(String fen) {
   final board = fen.split(' ').first;
