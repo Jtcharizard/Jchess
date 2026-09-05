@@ -1,7 +1,7 @@
 name: jchess
 description: Xadrez offline, personalizável e educativo para Android.
 publish_to: none
-version: 0.3.0+3
+version: 0.4.0+4
 
 environment:
   sdk: ">=3.6.0 <4.0.0"
@@ -27,6 +27,7 @@ flutter:
   assets:
     - assets/wallpapers/
     - assets/branding/
+    - assets/bots/
     - assets/pieces/chessnut/
     - assets/pieces/fantasy/
     - assets/pieces/spatial/

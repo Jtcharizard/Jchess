@@ -219,6 +219,54 @@ const boardPalettes = <BoardPalette>[
     light: Color(0xFFF7D9E5),
     dark: Color(0xFFB76A8D),
   ),
+  BoardPalette(
+    id: 'lava',
+    name: 'Lava',
+    light: Color(0xFFFFC078),
+    dark: Color(0xFF9E2A1B),
+  ),
+  BoardPalette(
+    id: 'cyber',
+    name: 'Cyber',
+    light: Color(0xFF90FFE6),
+    dark: Color(0xFF163B68),
+  ),
+  BoardPalette(
+    id: 'sakura',
+    name: 'Sakura',
+    light: Color(0xFFFFEEF4),
+    dark: Color(0xFFD65D88),
+  ),
+  BoardPalette(
+    id: 'royal',
+    name: 'Realeza',
+    light: Color(0xFFF1D28A),
+    dark: Color(0xFF51327E),
+  ),
+  BoardPalette(
+    id: 'coffee',
+    name: 'Café',
+    light: Color(0xFFE9C7A1),
+    dark: Color(0xFF5B3526),
+  ),
+  BoardPalette(
+    id: 'lime',
+    name: 'Limão',
+    light: Color(0xFFEAF7B2),
+    dark: Color(0xFF668B25),
+  ),
+  BoardPalette(
+    id: 'mono',
+    name: 'Monocromático',
+    light: Color(0xFFECECEC),
+    dark: Color(0xFF292929),
+  ),
+  BoardPalette(
+    id: 'arcade',
+    name: 'Arcade',
+    light: Color(0xFFFFED65),
+    dark: Color(0xFF6546D7),
+  ),
 ];
 
 BoardPalette boardPaletteById(String id) => boardPalettes.firstWhere(

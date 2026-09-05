@@ -16,9 +16,9 @@
   <a href="../../actions/workflows/android.yml"><img alt="Build Android" src="../../actions/workflows/android.yml/badge.svg"></a>
 </p>
 
-## O que já existe na v0.3
+## O que já existe na v0.4
 
-- Dez bots com nome, personalidade visual e forças de 0 a 20, todos movidos
+- Dez bots com nome, retrato próprio, personalidade visual e forças de 0 a 20, todos movidos
   pelo **Stockfish 18** offline.
 - A partida em andamento é salva automaticamente após cada lance e pode ser
   continuada da mesma posição mesmo depois de fechar o aplicativo.
@@ -29,7 +29,7 @@
 - Revisão pós-partida com marcos clicáveis de abertura, viradas, momento
   crítico, entrada no final e desfecho, além da análise lance por lance.
 - Vinte e quatro lições interativas em português, organizadas em cinco capítulos.
-- Doze paletas de tabuleiro, quinze conjuntos completos de peças e cinco fundos,
+- Vinte paletas de tabuleiro, quinze conjuntos completos de peças e cinco fundos,
   incluindo a arte da Tokai Teio.
 - Upload de wallpaper direto da galeria do celular.
 - Estatísticas e progresso das lições salvos no aparelho.
@@ -42,8 +42,8 @@ O próprio GitHub compila o aplicativo:
 1. Abra a aba **Actions** deste repositório.
 2. Entre em **Android • Gerar APK**.
 3. Toque em **Run workflow**.
-4. Quando terminar, baixe o artefato **JChess-APK-v0.3.0-arm64**.
-5. Extraia o arquivo e instale `JChess-v0.3.0-arm64.apk`.
+4. Quando terminar, baixe o artefato **JChess-APK-v0.4.0-arm64**.
+5. Extraia o arquivo e instale `JChess-v0.4.0-arm64.apk`.
 
 O APK é ARM64 para não carregar três cópias gigantes do Stockfish. Essa é a
 arquitetura usada pela imensa maioria dos celulares Android atuais.

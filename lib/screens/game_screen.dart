@@ -10,6 +10,7 @@ import '../chess/bot_catalog.dart';
 import '../chess/game_models.dart';
 import '../chess/stockfish_service.dart';
 import '../widgets/app_background.dart';
+import '../widgets/bot_portrait.dart';
 import '../widgets/chess_board.dart';
 import 'analysis_screen.dart';
 
@@ -143,7 +144,7 @@ class _GameScreenState extends State<GameScreen> {
                           isWhite: topIsWhite,
                           name: _playerName(topIsWhite),
                           subtitle: _playerSubtitle(topIsWhite),
-                          avatar: _playerAvatar(topIsWhite),
+                          bot: _playerBot(topIsWhite),
                           active: _whiteToMove == topIsWhite && !_finished,
                           thinking: _thinking && _isBotColor(topIsWhite),
                         ),
@@ -171,7 +172,7 @@ class _GameScreenState extends State<GameScreen> {
                           isWhite: !topIsWhite,
                           name: _playerName(!topIsWhite),
                           subtitle: _playerSubtitle(!topIsWhite),
-                          avatar: _playerAvatar(!topIsWhite),
+                          bot: _playerBot(!topIsWhite),
                           active: _whiteToMove != topIsWhite && !_finished,
                           thinking: _thinking && _isBotColor(!topIsWhite),
                         ),
@@ -261,11 +262,11 @@ class _GameScreenState extends State<GameScreen> {
   bool _isBotColor(bool white) =>
       widget.config.mode == GameMode.bot && white != widget.config.humanIsWhite;
 
-  String _playerAvatar(bool white) {
+  BotProfile? _playerBot(bool white) {
     if (widget.config.mode == GameMode.bot && _isBotColor(white)) {
-      return _bot.emoji;
+      return _bot;
     }
-    return '';
+    return null;
   }
 
   void _onSquareTap(String square) {
@@ -620,7 +621,7 @@ class _PlayerStrip extends StatelessWidget {
     required this.isWhite,
     required this.name,
     required this.subtitle,
-    required this.avatar,
+    required this.bot,
     required this.active,
     required this.thinking,
   });
@@ -628,7 +629,7 @@ class _PlayerStrip extends StatelessWidget {
   final bool isWhite;
   final String name;
   final String subtitle;
-  final String avatar;
+  final BotProfile? bot;
   final bool active;
   final bool thinking;
 
@@ -655,8 +656,8 @@ class _PlayerStrip extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
-            child: avatar.isNotEmpty
-                ? Text(avatar, style: const TextStyle(fontSize: 23))
+            child: bot != null
+                ? BotPortrait(bot: bot!, size: 38, borderRadius: 12)
                 : ChessPieceImage(
                     pieceSetId: context.app.pieceSet,
                     white: isWhite,

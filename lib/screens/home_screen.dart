@@ -6,6 +6,7 @@ import '../app/app_controller.dart';
 import '../app/app_theme.dart';
 import '../chess/bot_catalog.dart';
 import '../chess/game_models.dart';
+import '../widgets/bot_portrait.dart';
 import 'game_screen.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -181,20 +182,16 @@ class _BrandHeader extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: emberOrange,
             borderRadius: BorderRadius.circular(15),
             boxShadow: const [
               BoxShadow(color: Color(0x66FF8A2A), blurRadius: 20),
             ],
           ),
-          alignment: Alignment.center,
-          child: const Text(
-            '♞',
-            style: TextStyle(
-              color: Color(0xFF24150A),
-              fontSize: 31,
-              fontWeight: FontWeight.w900,
-            ),
+          clipBehavior: Clip.antiAlias,
+          child: Image.asset(
+            'assets/branding/app_icon.png',
+            fit: BoxFit.cover,
+            cacheWidth: 144,
           ),
         ),
         const SizedBox(width: 12),
@@ -222,8 +219,12 @@ class _BrandHeader extends StatelessWidget {
           onPressed: () => showAboutDialog(
             context: context,
             applicationName: 'JChess',
-            applicationVersion: '0.3.0',
-            applicationIcon: const Text('♞', style: TextStyle(fontSize: 42)),
+            applicationVersion: '0.4.0',
+            applicationIcon: Image.asset(
+              'assets/branding/app_icon.png',
+              width: 54,
+              height: 54,
+            ),
             children: const [
               Text('Xadrez offline, educativo e personalizável.'),
             ],
@@ -387,6 +388,9 @@ class _ResumeGameCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bot = game.config.mode == GameMode.bot
+        ? botById(game.config.botId)
+        : null;
     final opponent = game.config.mode == GameMode.bot
         ? botById(game.config.botId).name
         : 'partida local';
@@ -412,7 +416,9 @@ class _ResumeGameCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(15),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(Icons.play_arrow_rounded, color: emberOrange),
+                child: bot == null
+                    ? const Icon(Icons.people_alt_rounded, color: emberOrange)
+                    : BotPortrait(bot: bot, size: 48, borderRadius: 15),
               ),
               const SizedBox(width: 13),
               Expanded(
@@ -741,7 +747,7 @@ class _BotCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(bot.emoji, style: const TextStyle(fontSize: 32)),
+            BotPortrait(bot: bot, size: 54, borderRadius: 16),
             const Spacer(),
             Text(
               bot.name,

@@ -1,30 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
   <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#17110d"/>
-      <stop offset="0.62" stop-color="#2c1b11"/>
-      <stop offset="1" stop-color="#8b3b15"/>
+    <clipPath id="iconClip">
+      <rect width="1024" height="1024" rx="228"/>
+    </clipPath>
+    <linearGradient id="background" x1="128" y1="96" x2="896" y2="928" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2b1a12"/>
+      <stop offset=".48" stop-color="#18120f"/>
+      <stop offset="1" stop-color="#0d0b0a"/>
     </linearGradient>
-    <linearGradient id="fire" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#ffb15d"/>
-      <stop offset="1" stop-color="#ff781f"/>
+    <linearGradient id="ember" x1="286" y1="190" x2="760" y2="854" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffbd72"/>
+      <stop offset=".42" stop-color="#ff8a2a"/>
+      <stop offset="1" stop-color="#ef5a18"/>
     </linearGradient>
-    <filter id="shadow"><feDropShadow dx="0" dy="22" stdDeviation="18" flood-opacity="0.45"/></filter>
+    <pattern id="board" width="160" height="160" patternUnits="userSpaceOnUse" patternTransform="rotate(-12)">
+      <rect width="80" height="80" fill="#ff8a2a"/>
+      <rect x="80" y="80" width="80" height="80" fill="#ff8a2a"/>
+    </pattern>
   </defs>
-  <rect width="1024" height="1024" rx="224" fill="url(#bg)"/>
-  <g opacity="0.11" fill="#ffffff">
-    <rect x="112" y="112" width="100" height="100"/><rect x="312" y="112" width="100" height="100"/><rect x="512" y="112" width="100" height="100"/><rect x="712" y="112" width="100" height="100"/>
-    <rect x="212" y="212" width="100" height="100"/><rect x="412" y="212" width="100" height="100"/><rect x="612" y="212" width="100" height="100"/><rect x="812" y="212" width="100" height="100"/>
-    <rect x="112" y="312" width="100" height="100"/><rect x="312" y="312" width="100" height="100"/><rect x="512" y="312" width="100" height="100"/><rect x="712" y="312" width="100" height="100"/>
-    <rect x="212" y="412" width="100" height="100"/><rect x="412" y="412" width="100" height="100"/><rect x="612" y="412" width="100" height="100"/><rect x="812" y="412" width="100" height="100"/>
-    <rect x="112" y="512" width="100" height="100"/><rect x="312" y="512" width="100" height="100"/><rect x="512" y="512" width="100" height="100"/><rect x="712" y="512" width="100" height="100"/>
-    <rect x="212" y="612" width="100" height="100"/><rect x="412" y="612" width="100" height="100"/><rect x="612" y="612" width="100" height="100"/><rect x="812" y="612" width="100" height="100"/>
-    <rect x="112" y="712" width="100" height="100"/><rect x="312" y="712" width="100" height="100"/><rect x="512" y="712" width="100" height="100"/><rect x="712" y="712" width="100" height="100"/>
-    <rect x="212" y="812" width="100" height="100"/><rect x="412" y="812" width="100" height="100"/><rect x="612" y="812" width="100" height="100"/><rect x="812" y="812" width="100" height="100"/>
-  </g>
-  <circle cx="512" cy="500" r="314" fill="#17120f" stroke="url(#fire)" stroke-width="30" filter="url(#shadow)"/>
-  <text x="512" y="650" text-anchor="middle" font-family="DejaVu Serif, serif" font-size="470" font-weight="700" fill="#fff8ef">♞</text>
-  <circle cx="772" cy="760" r="105" fill="url(#fire)"/>
-  <text x="772" y="807" text-anchor="middle" font-family="DejaVu Sans, sans-serif" font-size="128" font-weight="900" fill="#281509">J</text>
-</svg>
 
+  <rect width="1024" height="1024" rx="228" fill="url(#background)"/>
+  <g clip-path="url(#iconClip)">
+    <path d="M540-30h520v1080H540z" fill="url(#board)" opacity=".055"/>
+    <circle cx="175" cy="830" r="240" fill="#ff8a2a" opacity=".055"/>
+  </g>
+
+  <path
+    fill="url(#ember)"
+    d="M294 174h128v82h76v-82h128v82h76v-82h128v208H704v258c0 158-98 246-253 246-151 0-257-88-257-230v-58h174v45c0 67 35 104 91 104 61 0 78-44 78-119V382H294z"
+  />
+
+  <path
+    fill="#fff7ec"
+    opacity=".94"
+    d="M369 618v33c0 65 29 101 82 112-79 2-128-39-128-116v-29z"
+  />
+</svg>
