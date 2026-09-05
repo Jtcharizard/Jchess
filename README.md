@@ -1,2 +1,84 @@
-# Jchess
-Xadrez:)
+<p align="center">
+  <img src="assets/branding/app_icon.png" width="120" alt="Ícone do JChess">
+</p>
+
+<h1 align="center">JChess</h1>
+
+<p align="center">
+  <strong>Xadrez offline, educativo e com personalidade.</strong><br>
+  Joga contra o Stockfish, aprende no próprio tabuleiro e revisa cada decisão.
+</p>
+
+<p align="center">
+  <img alt="Flutter" src="https://img.shields.io/badge/Flutter-Android-54C5F8?logo=flutter&logoColor=white">
+  <img alt="Offline" src="https://img.shields.io/badge/funciona-offline-ff8a2a">
+  <img alt="Licença MIT" src="https://img.shields.io/badge/c%C3%B3digo-MIT-8c4a25">
+  <a href="../../actions/workflows/android.yml"><img alt="Build Android" src="../../actions/workflows/android.yml/badge.svg"></a>
+</p>
+
+## O que já existe na v0.1
+
+- Partida completa contra **Stockfish 18**, com dificuldade de 0 a 20.
+- Partida local para duas pessoas no mesmo celular.
+- Regras legais de xadrez: xeque, mate, empate, roque, promoção e *en passant*.
+- Seleção de casas, movimentos possíveis, último lance, girar tabuleiro e desfazer.
+- Dica calculada pelo motor sem depender de internet.
+- Revisão pós-partida com barra de vantagem, melhor lance, perda de avaliação,
+  classificação dos erros e precisão aproximada.
+- Dez lições interativas em português, do movimento das peças ao mate em um.
+- Quatro paletas de tabuleiro e cinco fundos, incluindo a arte da Tokai Teio.
+- Upload de wallpaper direto da galeria do celular.
+- Estatísticas e progresso das lições salvos no aparelho.
+- Exportação da partida em PGN para a área de transferência.
+
+## APK pelo celular
+
+O próprio GitHub compila o aplicativo:
+
+1. Abra a aba **Actions** deste repositório.
+2. Entre em **Android • Gerar APK**.
+3. Toque em **Run workflow**.
+4. Quando terminar, baixe o artefato **JChess-APK-v0.1.0**.
+5. Extraia o arquivo e instale `JChess-v0.1.0.apk`.
+
+Cada envio para a branch `main` também inicia uma compilação automaticamente.
+
+## Rodar localmente
+
+```bash
+flutter create --platforms=android --org com.jtcharizard --project-name jchess .
+flutter pub get
+dart run flutter_launcher_icons
+flutter run
+```
+
+O Android precisa usar `minSdk 24` por causa do seletor moderno de imagens.
+
+## Estrutura
+
+```text
+lib/
+├── app/       tema, preferências e estatísticas
+├── chess/     modelos, lições e comunicação UCI com o Stockfish
+├── screens/   início, partida, análise, aprendizado e personalização
+└── widgets/   tabuleiro e fundos reutilizáveis
+```
+
+## Próximos passos
+
+- Salvar histórico de partidas e importar PGN.
+- Relógios Bullet, Blitz e Rápida.
+- Exercícios táticos gerados a partir dos erros do jogador.
+- Mais estilos de peças e wallpapers originais.
+- Conquistas, sequência diária e desafios.
+- Multiplayer online em uma etapa separada, com servidor e contas.
+
+## Créditos e licença
+
+O JChess usa [`chess.dart`](https://pub.dev/packages/chess) para validar as regras
+e [`stockfish`](https://pub.dev/packages/stockfish) como motor local. O código do
+JChess mantém a licença MIT do repositório; o Stockfish é GPL-3.0 e as
+distribuições do APK precisam respeitar os termos dessa licença. Veja os
+[avisos de terceiros](THIRD_PARTY_NOTICES.md). **JChess não é afiliado ao
+Chess.com** e não usa o nome, a marca nem os elementos visuais oficiais da
+plataforma.

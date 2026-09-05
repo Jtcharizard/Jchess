@@ -1,0 +1,63 @@
+name: Android • Gerar APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Baixar o projeto
+        uses: actions/checkout@v4
+
+      - name: Preparar Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Gerar a estrutura Android
+        run: |
+          flutter create --platforms=android --org com.jtcharizard --project-name jchess .
+          sed -i 's/android:label="jchess"/android:label="JChess"/' android/app/src/main/AndroidManifest.xml
+          if [ -f android/app/build.gradle.kts ]; then
+            sed -i 's/minSdk = flutter.minSdkVersion/minSdk = 24/' android/app/build.gradle.kts
+          fi
+          if [ -f android/app/build.gradle ]; then
+            sed -i 's/minSdkVersion flutter.minSdkVersion/minSdkVersion 24/' android/app/build.gradle
+          fi
+
+      - name: Baixar dependências
+        run: flutter pub get
+
+      - name: Aplicar o ícone
+        run: dart run flutter_launcher_icons
+
+      - name: Verificar o código
+        run: flutter analyze --no-fatal-infos
+
+      - name: Rodar testes
+        run: flutter test
+
+      - name: Compilar APK
+        run: flutter build apk --release
+
+      - name: Preparar arquivo final
+        run: cp build/app/outputs/flutter-apk/app-release.apk JChess-v0.1.0.apk
+
+      - name: Disponibilizar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: JChess-APK-v0.1.0
+          path: JChess-v0.1.0.apk
+          retention-days: 30
+          if-no-files-found: error
+

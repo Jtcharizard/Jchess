@@ -1,0 +1,35 @@
+name: jchess
+description: Xadrez offline, personalizável e educativo para Android.
+publish_to: none
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.6.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  chess: ^0.8.1
+  image_picker: ^1.2.3
+  path_provider: ^2.1.5
+  shared_preferences: ^2.5.3
+  stockfish: ^1.8.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_launcher_icons: ^0.14.4
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/wallpapers/
+    - assets/branding/
+
+flutter_launcher_icons:
+  android: true
+  image_path: assets/branding/app_icon.png
+  adaptive_icon_background: "#181411"
+  adaptive_icon_foreground: assets/branding/app_icon.png
+
