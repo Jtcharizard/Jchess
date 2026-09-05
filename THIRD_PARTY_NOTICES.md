@@ -34,5 +34,10 @@ repositório aberto do Lichess:
 - **Chessnut**, por Alexis Luengas — Apache License 2.0.
 - **Fantasy**, **Spatial** e **Celtic**, por Maurizio Monge — MIT.
 - **RhosGFX**, por RhosGFX — CC0 1.0.
+- **Kiwen Suwi**, por neverRare — CC BY 4.0.
+- **Papercut**, por Nikolay Anzarov — CC BY 4.0.
+- **Pixel**, por therealqtpi — AGPL-3.0-or-later.
+- **Shapes**, por flugsio — CC BY-SA 4.0.
+- **Totoy**, por Kosal Sen — CC BY 4.0.
 
 Origem e créditos: https://github.com/lichess-org/lila/blob/master/COPYING.md

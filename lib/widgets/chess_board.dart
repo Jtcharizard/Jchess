@@ -40,6 +40,31 @@ const pieceSets = <PieceSet>[
     name: 'Retrô',
     description: 'Pixel art completa',
   ),
+  PieceSet(
+    id: 'kiwen-suwi',
+    name: 'Suwi',
+    description: 'Fofo e expressivo',
+  ),
+  PieceSet(
+    id: 'papercut',
+    name: 'Recorte',
+    description: 'Papel, volume e sombra',
+  ),
+  PieceSet(
+    id: 'pixel',
+    name: 'Arcade',
+    description: 'Pixel art em blocos',
+  ),
+  PieceSet(
+    id: 'shapes',
+    name: 'Geometria',
+    description: 'Símbolos abstratos',
+  ),
+  PieceSet(
+    id: 'totoy',
+    name: 'Totoy',
+    description: 'Minimalista e ousado',
+  ),
 ];
 
 PieceSet pieceSetById(String id) => pieceSets.firstWhere(

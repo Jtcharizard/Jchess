@@ -29,7 +29,7 @@
 - Revisão pós-partida com marcos clicáveis de abertura, viradas, momento
   crítico, entrada no final e desfecho, além da análise lance por lance.
 - Vinte e quatro lições interativas em português, organizadas em cinco capítulos.
-- Doze paletas de tabuleiro, cinco conjuntos completos de peças e cinco fundos,
+- Doze paletas de tabuleiro, dez conjuntos completos de peças e cinco fundos,
   incluindo a arte da Tokai Teio.
 - Upload de wallpaper direto da galeria do celular.
 - Estatísticas e progresso das lições salvos no aparelho.

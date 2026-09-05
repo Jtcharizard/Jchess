@@ -32,6 +32,11 @@ flutter:
     - assets/pieces/spatial/
     - assets/pieces/celtic/
     - assets/pieces/rhosgfx/
+    - assets/pieces/kiwen-suwi/
+    - assets/pieces/papercut/
+    - assets/pieces/pixel/
+    - assets/pieces/shapes/
+    - assets/pieces/totoy/
 
 flutter_launcher_icons:
   android: true
