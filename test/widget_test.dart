@@ -11,7 +11,15 @@ void main() {
     expect(find.text('JCHESS'), findsOneWidget);
     expect(find.text('Nova partida'), findsOneWidget);
     expect(find.text('Aprender'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Teu estilo de jogo'),
+      450,
+    );
+    await tester.pumpAndSettle();
+
     expect(find.text('Teu estilo de jogo'), findsOneWidget);
+    expect(find.text('Ainda estou te estudando'), findsOneWidget);
     expect(find.text('O que já está entrando'), findsNothing);
   });
 
