@@ -88,6 +88,7 @@ class _LessonScreenState extends State<LessonScreen> {
               ChessBoard(
                 game: _game,
                 paletteId: context.app.boardTheme,
+                pieceSetId: context.app.pieceSet,
                 selectedSquare: _selectedSquare,
                 legalTargets: _legalMoves.map((move) => move['to'] as String).toSet(),
                 lastFrom: _lastFrom,
@@ -218,4 +219,3 @@ class _LessonScreenState extends State<LessonScreen> {
     );
   }
 }
-

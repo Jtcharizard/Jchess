@@ -127,12 +127,128 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     return '${uci.substring(0, 2)} → ${uci.substring(2, 4)}$promotion';
   }
 
+  List<_ReviewMilestone> _buildMilestones() {
+    if (_analysis.isEmpty) return const [];
+    final milestones = <int, _ReviewMilestone>{};
+
+    void add(_ReviewMilestone milestone) {
+      milestones.putIfAbsent(milestone.moveIndex, () => milestone);
+    }
+
+    if (_analysis.length >= 4) {
+      final openingIndex = math.min(9, _analysis.length - 1);
+      add(
+        _ReviewMilestone(
+          moveIndex: openingIndex,
+          eyebrow: 'ABERTURA',
+          title: 'As peças entraram no jogo',
+          description: 'Confere desenvolvimento, centro e segurança do rei.',
+          icon: Icons.rocket_launch_rounded,
+          color: const Color(0xFF8BC8FF),
+        ),
+      );
+    }
+
+    var criticalIndex = 0;
+    for (var index = 1; index < _analysis.length; index++) {
+      if (_analysis[index].lossCp > _analysis[criticalIndex].lossCp) {
+        criticalIndex = index;
+      }
+    }
+    final critical = _analysis[criticalIndex];
+    add(
+      _ReviewMilestone(
+        moveIndex: criticalIndex,
+        eyebrow: critical.lossCp >= 120 ? 'MOMENTO CRÍTICO' : 'MAIOR OSCILAÇÃO',
+        title: critical.lossCp >= 260 ? 'A partida virou aqui' : 'Valia parar e calcular',
+        description: critical.lossCp == 0
+            ? 'Foi o ponto mais importante mesmo sem uma perda clara.'
+            : 'O lance cedeu cerca de ${(critical.lossCp / 100).toStringAsFixed(1)} peões.',
+        icon: critical.lossCp >= 260
+            ? Icons.warning_amber_rounded
+            : Icons.search_rounded,
+        color: _qualityColor(critical.quality),
+      ),
+    );
+
+    var previousSide = 0;
+    for (var index = 0; index < _analysis.length; index++) {
+      final score = _analysis[index].scoreAfterWhite;
+      final side = score > 80
+          ? 1
+          : score < -80
+              ? -1
+              : 0;
+      if (side != 0 && previousSide != 0 && side != previousSide) {
+        add(
+          _ReviewMilestone(
+            moveIndex: index,
+            eyebrow: 'VIRADA',
+            title: 'A vantagem trocou de lado',
+            description: 'Compara este lance com a sugestão do motor.',
+            icon: Icons.swap_horiz_rounded,
+            color: const Color(0xFFFFCB69),
+          ),
+        );
+        break;
+      }
+      if (side != 0) previousSide = side;
+    }
+
+    for (var index = 10; index < _analysis.length; index++) {
+      if (_isEndgame(_analysis[index].move.afterFen)) {
+        add(
+          _ReviewMilestone(
+            moveIndex: index,
+            eyebrow: 'FINAL',
+            title: 'Começou outra fase',
+            description: 'Com menos peças, rei ativo e peões passados valem mais.',
+            icon: Icons.hourglass_bottom_rounded,
+            color: const Color(0xFFB9C78A),
+          ),
+        );
+        break;
+      }
+    }
+
+    if (_analysis.length > 1) {
+      add(
+        _ReviewMilestone(
+          moveIndex: _analysis.length - 1,
+          eyebrow: 'DESFECHO',
+          title: 'Posição final',
+          description: 'Revê como a história da partida terminou.',
+          icon: Icons.flag_rounded,
+          color: emberOrange,
+        ),
+      );
+    }
+
+    final result = milestones.values.toList()
+      ..sort((a, b) => a.moveIndex.compareTo(b.moveIndex));
+    return result;
+  }
+
+  bool _isEndgame(String fen) {
+    final board = fen.split(' ').first;
+    var pieces = 0;
+    var officers = 0;
+    for (final rune in board.runes) {
+      final value = String.fromCharCode(rune).toLowerCase();
+      if (!'kqrbnp'.contains(value)) continue;
+      pieces++;
+      if (value != 'k' && value != 'p') officers++;
+    }
+    return pieces <= 12 || officers <= 4;
+  }
+
   @override
   Widget build(BuildContext context) {
     final hasAnalysis = _analysis.isNotEmpty;
     final selected = hasAnalysis ? _analysis[_selectedIndex] : null;
     final fen = selected?.move.afterFen ?? widget.moves.first.afterFen;
     final position = chesslib.Chess.fromFEN(fen);
+    final milestones = _running ? const <_ReviewMilestone>[] : _buildMilestones();
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -196,11 +312,54 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
                 ),
                 const SizedBox(height: 14),
               ],
+              if (milestones.isNotEmpty) ...[
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Marcos da partida',
+                        style: TextStyle(
+                          fontSize: 19,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${milestones.length} momentos',
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 11,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 9),
+                SizedBox(
+                  height: 137,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: milestones.length,
+                    separatorBuilder: (_, __) => const SizedBox(width: 9),
+                    itemBuilder: (context, index) {
+                      final milestone = milestones[index];
+                      return _MilestoneCard(
+                        milestone: milestone,
+                        selected: milestone.moveIndex == _selectedIndex,
+                        onTap: () => setState(
+                          () => _selectedIndex = milestone.moveIndex,
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
               _AdvantageMeter(scoreWhite: selected?.scoreAfterWhite ?? 0),
               const SizedBox(height: 10),
               ChessBoard(
                 game: position,
                 paletteId: context.app.boardTheme,
+                pieceSetId: context.app.pieceSet,
                 flipped: widget.versusBot ? !widget.humanIsWhite : false,
                 lastFrom: selected?.move.from,
                 lastTo: selected?.move.to,
@@ -279,6 +438,114 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
     final averageLoss = sideMoves.fold<int>(0, (sum, item) => sum + item.lossCp) /
         sideMoves.length;
     return (100 * math.exp(-averageLoss / 185)).clamp(0, 100).toDouble();
+  }
+}
+
+class _ReviewMilestone {
+  const _ReviewMilestone({
+    required this.moveIndex,
+    required this.eyebrow,
+    required this.title,
+    required this.description,
+    required this.icon,
+    required this.color,
+  });
+
+  final int moveIndex;
+  final String eyebrow;
+  final String title;
+  final String description;
+  final IconData icon;
+  final Color color;
+}
+
+class _MilestoneCard extends StatelessWidget {
+  const _MilestoneCard({
+    required this.milestone,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final _ReviewMilestone milestone;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 170),
+        width: 205,
+        padding: const EdgeInsets.all(13),
+        decoration: BoxDecoration(
+          color: selected
+              ? milestone.color.withValues(alpha: .18)
+              : const Color(0xD9251F1B),
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: selected ? milestone.color : Colors.white10,
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: milestone.color.withValues(alpha: .18),
+                borderRadius: BorderRadius.circular(11),
+              ),
+              child: Icon(milestone.icon, color: milestone.color, size: 20),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '${milestone.eyebrow} · ${milestone.moveIndex ~/ 2 + 1}${milestone.moveIndex.isEven ? '.' : '…'}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: milestone.color,
+                      fontSize: 9,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: .55,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    milestone.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      height: 1.05,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const SizedBox(height: 5),
+                  Text(
+                    milestone.description,
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.white54,
+                      fontSize: 10,
+                      height: 1.2,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

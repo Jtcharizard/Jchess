@@ -1,6 +1,8 @@
 import 'dart:io';
 
+import 'package:chess/chess.dart' as chesslib;
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -14,141 +16,101 @@ class CustomizeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final app = context.app;
-    return SafeArea(
-      bottom: false,
-      child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 18, 20, 110),
-        children: [
-          const Text('Visual', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w900)),
-          const SizedBox(height: 5),
-          const Text(
-            'Deixa o tabuleiro com a tua cara.',
-            style: TextStyle(color: Colors.white60),
-          ),
-          const SizedBox(height: 24),
-          const _SectionTitle(title: 'Fundo do aplicativo', icon: Icons.wallpaper_rounded),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: 152,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: [
-                _WallpaperTile(
-                  label: 'Pôr do sol',
-                  selected: app.wallpaper == 'sunset',
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF160F0B), Color(0xFF9B4017), Color(0xFFFF8A2A)],
-                    ),
-                  ),
-                  onTap: () => app.setWallpaper('sunset'),
-                ),
-                _WallpaperTile(
-                  label: 'Meia-noite',
-                  selected: app.wallpaper == 'midnight',
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(colors: [Color(0xFF101820), Color(0xFF385066)]),
-                  ),
-                  onTap: () => app.setWallpaper('midnight'),
-                ),
-                _WallpaperTile(
-                  label: 'Floresta',
-                  selected: app.wallpaper == 'forest',
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(colors: [Color(0xFF10251B), Color(0xFF4E774C)]),
-                  ),
-                  onTap: () => app.setWallpaper('forest'),
-                ),
-                _WallpaperTile(
-                  label: 'Violeta',
-                  selected: app.wallpaper == 'violet',
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(colors: [Color(0xFF21132E), Color(0xFF76518F)]),
-                  ),
-                  onTap: () => app.setWallpaper('violet'),
-                ),
-                _WallpaperTile(
-                  label: 'Tokai Teio',
-                  selected: app.wallpaper == 'tokai',
-                  decoration: const BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/wallpapers/tokai_teio.jpg'),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  onTap: () => app.setWallpaper('tokai'),
-                ),
-                _UploadWallpaperTile(
-                  selected: app.wallpaper == 'custom',
-                  imagePath: app.customWallpaperPath,
-                  onTap: () => _pickWallpaper(context),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 28),
-          const _SectionTitle(title: 'Cores do tabuleiro', icon: Icons.grid_view_rounded),
-          const SizedBox(height: 12),
-          GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: boardPalettes.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 1.65,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
-            itemBuilder: (context, index) {
-              final palette = boardPalettes[index];
-              return _BoardPaletteTile(
-                palette: palette,
-                selected: app.boardTheme == palette.id,
-                onTap: () => app.setBoardTheme(palette.id),
-              );
-            },
-          ),
-          const SizedBox(height: 28),
-          const _SectionTitle(title: 'Bot padrão', icon: Icons.smart_toy_rounded),
-          const SizedBox(height: 12),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-              child: Column(
+    return DefaultTabController(
+      length: 3,
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 16, 20, 14),
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      const Text('Nível sugerido', style: TextStyle(fontWeight: FontWeight.w800)),
-                      const Spacer(),
-                      Text(
-                        '${app.botLevel}/20',
-                        style: const TextStyle(color: emberOrange, fontWeight: FontWeight.w900),
-                      ),
-                    ],
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tema',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        SizedBox(height: 3),
+                        Text(
+                          'Monta o teu tabuleiro, peça por peça.',
+                          style: TextStyle(color: Colors.white60),
+                        ),
+                      ],
+                    ),
                   ),
-                  Slider(
-                    value: app.botLevel.toDouble(),
-                    min: 0,
-                    max: 20,
-                    divisions: 20,
-                    onChanged: (value) => app.setBotLevel(value.round()),
-                  ),
-                  const Text(
-                    'Tu ainda pode mudar o nível antes de cada partida.',
-                    style: TextStyle(color: Colors.white54, fontSize: 12),
-                  ),
+                  Icon(Icons.auto_awesome_rounded, color: emberOrange),
                 ],
               ),
             ),
-          ),
-        ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 350),
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(18),
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Colors.black45,
+                          blurRadius: 20,
+                          offset: Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: ChessBoard(
+                      game: chesslib.Chess(),
+                      paletteId: app.boardTheme,
+                      pieceSetId: app.pieceSet,
+                      showCoordinates: false,
+                      onSquareTap: null,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xC91C1714),
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(color: Colors.white10),
+              ),
+              child: const TabBar(
+                dividerColor: Colors.transparent,
+                indicatorSize: TabBarIndicatorSize.tab,
+                tabs: [
+                  Tab(text: 'Tabuleiro'),
+                  Tab(text: 'Peças'),
+                  Tab(text: 'Fundo'),
+                ],
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Expanded(
+              child: TabBarView(
+                children: [
+                  _BoardTab(),
+                  _PiecesTab(),
+                  _WallpaperTab(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Future<void> _pickWallpaper(BuildContext context) async {
+  static Future<void> pickWallpaper(BuildContext context) async {
     try {
       final picked = await ImagePicker().pickImage(
         source: ImageSource.gallery,
@@ -175,20 +137,372 @@ class CustomizeScreen extends StatelessWidget {
   }
 }
 
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title, required this.icon});
+class _BoardTab extends StatelessWidget {
+  const _BoardTab();
 
-  final String title;
+  @override
+  Widget build(BuildContext context) {
+    final app = context.app;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 115),
+      children: [
+        const _SectionIntro(
+          icon: Icons.grid_view_rounded,
+          title: 'Cores do tabuleiro',
+          text: 'A cor muda sem mexer no conjunto de peças.',
+        ),
+        const SizedBox(height: 14),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: boardPalettes.length,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 1.56,
+            crossAxisSpacing: 10,
+            mainAxisSpacing: 10,
+          ),
+          itemBuilder: (context, index) {
+            final palette = boardPalettes[index];
+            return _BoardPaletteTile(
+              palette: palette,
+              selected: app.boardTheme == palette.id,
+              onTap: () => app.setBoardTheme(palette.id),
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
+class _PiecesTab extends StatelessWidget {
+  const _PiecesTab();
+
+  @override
+  Widget build(BuildContext context) {
+    final app = context.app;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 115),
+      children: [
+        const _SectionIntro(
+          icon: Icons.interests_rounded,
+          title: 'Conjuntos completos',
+          text: 'Cada opção troca rei, dama, torres, bispos, cavalos e peões juntos.',
+        ),
+        const SizedBox(height: 14),
+        for (final set in pieceSets) ...[
+          _PieceSetTile(
+            set: set,
+            selected: app.pieceSet == set.id,
+            onTap: () => app.setPieceSet(set.id),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ],
+    );
+  }
+}
+
+class _WallpaperTab extends StatelessWidget {
+  const _WallpaperTab();
+
+  @override
+  Widget build(BuildContext context) {
+    final app = context.app;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(18, 16, 18, 115),
+      children: [
+        const _SectionIntro(
+          icon: Icons.wallpaper_rounded,
+          title: 'Fundo do aplicativo',
+          text: 'Escolhe um clima ou coloca uma imagem da tua galeria.',
+        ),
+        const SizedBox(height: 14),
+        GridView.count(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisCount: 2,
+          childAspectRatio: .92,
+          crossAxisSpacing: 10,
+          mainAxisSpacing: 10,
+          children: [
+            _WallpaperTile(
+              label: 'Pôr do sol',
+              selected: app.wallpaper == 'sunset',
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color(0xFF160F0B),
+                    Color(0xFF9B4017),
+                    Color(0xFFFF8A2A),
+                  ],
+                ),
+              ),
+              onTap: () => app.setWallpaper('sunset'),
+            ),
+            _WallpaperTile(
+              label: 'Meia-noite',
+              selected: app.wallpaper == 'midnight',
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF101820), Color(0xFF385066)],
+                ),
+              ),
+              onTap: () => app.setWallpaper('midnight'),
+            ),
+            _WallpaperTile(
+              label: 'Floresta',
+              selected: app.wallpaper == 'forest',
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF10251B), Color(0xFF4E774C)],
+                ),
+              ),
+              onTap: () => app.setWallpaper('forest'),
+            ),
+            _WallpaperTile(
+              label: 'Violeta',
+              selected: app.wallpaper == 'violet',
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [Color(0xFF21132E), Color(0xFF76518F)],
+                ),
+              ),
+              onTap: () => app.setWallpaper('violet'),
+            ),
+            _WallpaperTile(
+              label: 'Tokai Teio',
+              selected: app.wallpaper == 'tokai',
+              decoration: const BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage('assets/wallpapers/tokai_teio.jpg'),
+                  fit: BoxFit.cover,
+                ),
+              ),
+              onTap: () => app.setWallpaper('tokai'),
+            ),
+            _UploadWallpaperTile(
+              selected: app.wallpaper == 'custom',
+              imagePath: app.customWallpaperPath,
+              onTap: () => CustomizeScreen.pickWallpaper(context),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+class _SectionIntro extends StatelessWidget {
+  const _SectionIntro({
+    required this.icon,
+    required this.title,
+    required this.text,
+  });
+
   final IconData icon;
+  final String title;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: emberOrange, size: 21),
-        const SizedBox(width: 8),
-        Text(title, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900)),
+        Container(
+          width: 42,
+          height: 42,
+          decoration: BoxDecoration(
+            color: emberOrange.withValues(alpha: .14),
+            borderRadius: BorderRadius.circular(13),
+          ),
+          child: Icon(icon, color: emberOrange),
+        ),
+        const SizedBox(width: 11),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              Text(
+                text,
+                style: const TextStyle(color: Colors.white54, fontSize: 11),
+              ),
+            ],
+          ),
+        ),
       ],
+    );
+  }
+}
+
+class _PieceSetTile extends StatelessWidget {
+  const _PieceSetTile({
+    required this.set,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final PieceSet set;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    const types = ['k', 'q', 'r', 'b', 'n', 'p'];
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: BorderSide(
+          color: selected ? emberOrange : Colors.white10,
+          width: selected ? 2 : 1,
+        ),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          set.name,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                        const SizedBox(width: 7),
+                        if (selected)
+                          const Icon(
+                            Icons.check_circle_rounded,
+                            color: emberOrange,
+                            size: 18,
+                          ),
+                      ],
+                    ),
+                    Text(
+                      set.description,
+                      style: const TextStyle(
+                        color: Colors.white54,
+                        fontSize: 11,
+                      ),
+                    ),
+                    const SizedBox(height: 9),
+                    Row(
+                      children: [
+                        for (final type in types)
+                          Expanded(
+                            child: SvgPicture.asset(
+                              pieceAssetPath(
+                                set.id,
+                                white: true,
+                                type: type,
+                              ),
+                              height: 29,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 10),
+              Container(
+                width: 66,
+                height: 66,
+                padding: const EdgeInsets.all(5),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF0D9B5),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: SvgPicture.asset(
+                  pieceAssetPath(set.id, white: false, type: 'n'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BoardPaletteTile extends StatelessWidget {
+  const _BoardPaletteTile({
+    required this.palette,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final BoardPalette palette;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(19),
+        side: BorderSide(
+          color: selected ? emberOrange : Colors.transparent,
+          width: 2,
+        ),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(19),
+        child: Padding(
+          padding: const EdgeInsets.all(9),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(9),
+                child: SizedBox(
+                  width: 50,
+                  height: 50,
+                  child: GridView.builder(
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 4,
+                    ),
+                    itemCount: 16,
+                    itemBuilder: (_, index) => ColoredBox(
+                      color: ((index ~/ 4) + index).isEven
+                          ? palette.light
+                          : palette.dark,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 9),
+              Expanded(
+                child: Text(
+                  palette.name,
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+              ),
+              if (selected)
+                const Icon(Icons.check_rounded, color: emberOrange, size: 18),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -208,44 +522,53 @@ class _WallpaperTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right: 10),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(19),
-        child: Container(
-          width: 104,
-          decoration: decoration.copyWith(
-            borderRadius: BorderRadius.circular(19),
-            border: Border.all(color: selected ? emberOrange : Colors.white12, width: selected ? 3 : 1),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(19),
+      child: Container(
+        decoration: decoration.copyWith(
+          borderRadius: BorderRadius.circular(19),
+          border: Border.all(
+            color: selected ? emberOrange : Colors.white12,
+            width: selected ? 3 : 1,
           ),
-          clipBehavior: Clip.antiAlias,
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              const DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter,
-                    end: Alignment.bottomCenter,
-                    colors: [Colors.transparent, Color(0xCC000000)],
-                  ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            const DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [Colors.transparent, Color(0xDD000000)],
                 ),
               ),
-              Positioned(
-                left: 9,
+            ),
+            Positioned(
+              left: 12,
+              right: 12,
+              bottom: 12,
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ),
+            if (selected)
+              const Positioned(
+                top: 9,
                 right: 9,
-                bottom: 9,
-                child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900)),
-              ),
-              if (selected)
-                const Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Icon(Icons.check_circle_rounded, color: emberOrange, size: 20),
+                child: Icon(
+                  Icons.check_circle_rounded,
+                  color: emberOrange,
+                  size: 22,
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       ),
     );
@@ -253,7 +576,11 @@ class _WallpaperTile extends StatelessWidget {
 }
 
 class _UploadWallpaperTile extends StatelessWidget {
-  const _UploadWallpaperTile({required this.selected, required this.imagePath, required this.onTap});
+  const _UploadWallpaperTile({
+    required this.selected,
+    required this.imagePath,
+    required this.onTap,
+  });
 
   final bool selected;
   final String? imagePath;
@@ -262,86 +589,48 @@ class _UploadWallpaperTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasImage = imagePath != null && File(imagePath!).existsSync();
-    return Padding(
-      padding: const EdgeInsets.only(right: 10),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(19),
-        child: Container(
-          width: 104,
-          decoration: BoxDecoration(
-            color: const Color(0xFF2A221D),
-            image: hasImage
-                ? DecorationImage(image: FileImage(File(imagePath!)), fit: BoxFit.cover)
-                : null,
-            borderRadius: BorderRadius.circular(19),
-            border: Border.all(color: selected ? emberOrange : Colors.white12, width: selected ? 3 : 1),
-          ),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              color: Colors.black.withValues(alpha: hasImage ? .38 : .08),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(hasImage ? Icons.add_photo_alternate_rounded : Icons.upload_rounded, color: emberOrange, size: 30),
-                const SizedBox(height: 8),
-                Text(
-                  hasImage ? 'Trocar foto' : 'Tua foto',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900),
-                ),
-              ],
-            ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(19),
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF2A221D),
+          image: hasImage
+              ? DecorationImage(
+                  image: FileImage(File(imagePath!)),
+                  fit: BoxFit.cover,
+                )
+              : null,
+          borderRadius: BorderRadius.circular(19),
+          border: Border.all(
+            color: selected ? emberOrange : Colors.white12,
+            width: selected ? 3 : 1,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _BoardPaletteTile extends StatelessWidget {
-  const _BoardPaletteTile({required this.palette, required this.selected, required this.onTap});
-
-  final BoardPalette palette;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: selected ? emberOrange : Colors.transparent, width: 2),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
-        child: Padding(
-          padding: const EdgeInsets.all(10),
-          child: Row(
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(18),
+            color: Colors.black.withValues(alpha: hasImage ? .45 : .10),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(9),
-                child: SizedBox(
-                  width: 54,
-                  height: 54,
-                  child: GridView.builder(
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 4),
-                    itemCount: 16,
-                    itemBuilder: (_, index) => ColoredBox(
-                      color: ((index ~/ 4) + index).isEven ? palette.light : palette.dark,
-                    ),
-                  ),
+              Icon(
+                hasImage
+                    ? Icons.add_photo_alternate_rounded
+                    : Icons.upload_rounded,
+                color: emberOrange,
+                size: 36,
+              ),
+              const SizedBox(height: 9),
+              Text(
+                hasImage ? 'Trocar tua foto' : 'Enviar tua foto',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
                 ),
               ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Text(palette.name, style: const TextStyle(fontWeight: FontWeight.w900)),
-              ),
-              if (selected) const Icon(Icons.check_rounded, color: emberOrange, size: 20),
             ],
           ),
         ),

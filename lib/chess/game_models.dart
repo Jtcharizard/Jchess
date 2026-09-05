@@ -7,11 +7,13 @@ class GameConfig {
     required this.mode,
     required this.humanIsWhite,
     required this.botLevel,
+    required this.botId,
   });
 
   final GameMode mode;
   final bool humanIsWhite;
   final int botLevel;
+  final String botId;
 }
 
 class PlayedMove {
@@ -98,4 +100,3 @@ extension MoveQualityText on MoveQuality {
         MoveQuality.blunder => '??',
       };
 }
-

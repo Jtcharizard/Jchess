@@ -5,9 +5,11 @@ enum GameResult { win, draw, loss, local }
 
 class AppController extends ChangeNotifier {
   static const _boardThemeKey = 'boardTheme';
+  static const _pieceSetKey = 'pieceSet';
   static const _wallpaperKey = 'wallpaper';
   static const _customWallpaperKey = 'customWallpaper';
   static const _botLevelKey = 'botLevel';
+  static const _botIdKey = 'botId';
   static const _completedLessonsKey = 'completedLessons';
   static const _gamesKey = 'games';
   static const _winsKey = 'wins';
@@ -17,9 +19,11 @@ class AppController extends ChangeNotifier {
   SharedPreferences? _preferences;
 
   String boardTheme = 'ember';
+  String pieceSet = 'chessnut';
   String wallpaper = 'sunset';
   String? customWallpaperPath;
   int botLevel = 5;
+  String botId = 'brasa';
   Set<int> completedLessons = <int>{};
   int games = 0;
   int wins = 0;
@@ -30,9 +34,11 @@ class AppController extends ChangeNotifier {
     _preferences = await SharedPreferences.getInstance();
     final preferences = _preferences!;
     boardTheme = preferences.getString(_boardThemeKey) ?? 'ember';
+    pieceSet = preferences.getString(_pieceSetKey) ?? 'chessnut';
     wallpaper = preferences.getString(_wallpaperKey) ?? 'sunset';
     customWallpaperPath = preferences.getString(_customWallpaperKey);
     botLevel = preferences.getInt(_botLevelKey) ?? 5;
+    botId = preferences.getString(_botIdKey) ?? 'brasa';
     completedLessons = preferences
             .getStringList(_completedLessonsKey)
             ?.map(int.tryParse)
@@ -51,6 +57,12 @@ class AppController extends ChangeNotifier {
     await _preferences?.setString(_boardThemeKey, value);
   }
 
+  Future<void> setPieceSet(String value) async {
+    pieceSet = value;
+    notifyListeners();
+    await _preferences?.setString(_pieceSetKey, value);
+  }
+
   Future<void> setWallpaper(String value, {String? customPath}) async {
     wallpaper = value;
     if (customPath != null) {
@@ -65,6 +77,16 @@ class AppController extends ChangeNotifier {
     botLevel = value.clamp(0, 20).toInt();
     notifyListeners();
     await _preferences?.setInt(_botLevelKey, botLevel);
+  }
+
+  Future<void> setBot(String id, int level) async {
+    botId = id;
+    botLevel = level.clamp(0, 20).toInt();
+    notifyListeners();
+    await Future.wait([
+      _preferences?.setString(_botIdKey, botId) ?? Future.value(true),
+      _preferences?.setInt(_botLevelKey, botLevel) ?? Future.value(true),
+    ]);
   }
 
   Future<void> completeLesson(int index) async {

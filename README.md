@@ -16,17 +16,19 @@
   <a href="../../actions/workflows/android.yml"><img alt="Build Android" src="../../actions/workflows/android.yml/badge.svg"></a>
 </p>
 
-## O que já existe na v0.1
+## O que já existe na v0.2
 
-- Partida completa contra **Stockfish 18**, com dificuldade de 0 a 20.
+- Dez bots com nome, personalidade visual e forças de 0 a 20, todos movidos
+  pelo **Stockfish 18** offline.
 - Partida local para duas pessoas no mesmo celular.
 - Regras legais de xadrez: xeque, mate, empate, roque, promoção e *en passant*.
 - Seleção de casas, movimentos possíveis, último lance, girar tabuleiro e desfazer.
 - Dica calculada pelo motor sem depender de internet.
-- Revisão pós-partida com barra de vantagem, melhor lance, perda de avaliação,
-  classificação dos erros e precisão aproximada.
-- Dez lições interativas em português, do movimento das peças ao mate em um.
-- Quatro paletas de tabuleiro e cinco fundos, incluindo a arte da Tokai Teio.
+- Revisão pós-partida com marcos clicáveis de abertura, viradas, momento
+  crítico, entrada no final e desfecho, além da análise lance por lance.
+- Vinte e quatro lições interativas em português, organizadas em cinco capítulos.
+- Doze paletas de tabuleiro, cinco conjuntos completos de peças e cinco fundos,
+  incluindo a arte da Tokai Teio.
 - Upload de wallpaper direto da galeria do celular.
 - Estatísticas e progresso das lições salvos no aparelho.
 - Exportação da partida em PGN para a área de transferência.
@@ -38,8 +40,8 @@ O próprio GitHub compila o aplicativo:
 1. Abra a aba **Actions** deste repositório.
 2. Entre em **Android • Gerar APK**.
 3. Toque em **Run workflow**.
-4. Quando terminar, baixe o artefato **JChess-APK-v0.1.0-arm64**.
-5. Extraia o arquivo e instale `JChess-v0.1.0-arm64.apk`.
+4. Quando terminar, baixe o artefato **JChess-APK-v0.2.0-arm64**.
+5. Extraia o arquivo e instale `JChess-v0.2.0-arm64.apk`.
 
 O APK é ARM64 para não carregar três cópias gigantes do Stockfish. Essa é a
 arquitetura usada pela imensa maioria dos celulares Android atuais.
@@ -72,7 +74,7 @@ lib/
 - Salvar histórico de partidas e importar PGN.
 - Relógios Bullet, Blitz e Rápida.
 - Exercícios táticos gerados a partir dos erros do jogador.
-- Mais estilos de peças e wallpapers originais.
+- Mais wallpapers originais.
 - Conquistas, sequência diária e desafios.
 - Multiplayer online em uma etapa separada, com servidor e contas.
 

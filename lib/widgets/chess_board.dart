@@ -1,5 +1,86 @@
 import 'package:chess/chess.dart' as chesslib;
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+
+class PieceSet {
+  const PieceSet({
+    required this.id,
+    required this.name,
+    required this.description,
+  });
+
+  final String id;
+  final String name;
+  final String description;
+}
+
+const pieceSets = <PieceSet>[
+  PieceSet(
+    id: 'chessnut',
+    name: 'Chessnut',
+    description: 'Clássico limpo',
+  ),
+  PieceSet(
+    id: 'fantasy',
+    name: 'Fantasia',
+    description: 'Detalhado e elegante',
+  ),
+  PieceSet(
+    id: 'spatial',
+    name: 'Espacial',
+    description: 'Moderno e afiado',
+  ),
+  PieceSet(
+    id: 'celtic',
+    name: 'Celta',
+    description: 'Ornamentos medievais',
+  ),
+  PieceSet(
+    id: 'rhosgfx',
+    name: 'Retrô',
+    description: 'Pixel art completa',
+  ),
+];
+
+PieceSet pieceSetById(String id) => pieceSets.firstWhere(
+      (set) => set.id == id,
+      orElse: () => pieceSets.first,
+    );
+
+String pieceAssetPath(
+  String setId, {
+  required bool white,
+  required String type,
+}) {
+  final safeSet = pieceSetById(setId).id;
+  return 'assets/pieces/$safeSet/${white ? 'w' : 'b'}${type.toUpperCase()}.svg';
+}
+
+class ChessPieceImage extends StatelessWidget {
+  const ChessPieceImage({
+    required this.pieceSetId,
+    required this.white,
+    required this.type,
+    this.size,
+    super.key,
+  });
+
+  final String pieceSetId;
+  final bool white;
+  final String type;
+  final double? size;
+
+  @override
+  Widget build(BuildContext context) {
+    return SvgPicture.asset(
+      pieceAssetPath(pieceSetId, white: white, type: type),
+      width: size,
+      height: size,
+      fit: BoxFit.contain,
+      excludeFromSemantics: true,
+    );
+  }
+}
 
 class BoardPalette {
   const BoardPalette({
@@ -40,6 +121,54 @@ const boardPalettes = <BoardPalette>[
     light: Color(0xFFE5D5F4),
     dark: Color(0xFF76518F),
   ),
+  BoardPalette(
+    id: 'forest',
+    name: 'Floresta',
+    light: Color(0xFFD9E8C4),
+    dark: Color(0xFF5E7D45),
+  ),
+  BoardPalette(
+    id: 'graphite',
+    name: 'Grafite',
+    light: Color(0xFFBFC4CC),
+    dark: Color(0xFF48515E),
+  ),
+  BoardPalette(
+    id: 'ice',
+    name: 'Gelo',
+    light: Color(0xFFE4F4F8),
+    dark: Color(0xFF8AB4C2),
+  ),
+  BoardPalette(
+    id: 'sand',
+    name: 'Areia',
+    light: Color(0xFFF2DEB5),
+    dark: Color(0xFFC4935C),
+  ),
+  BoardPalette(
+    id: 'rosewood',
+    name: 'Jacarandá',
+    light: Color(0xFFE8BE94),
+    dark: Color(0xFF8D4634),
+  ),
+  BoardPalette(
+    id: 'emerald',
+    name: 'Esmeralda',
+    light: Color(0xFFE5EBD5),
+    dark: Color(0xFF2F765C),
+  ),
+  BoardPalette(
+    id: 'midnight',
+    name: 'Meia-noite',
+    light: Color(0xFF97A7BD),
+    dark: Color(0xFF29364B),
+  ),
+  BoardPalette(
+    id: 'candy',
+    name: 'Doce',
+    light: Color(0xFFF7D9E5),
+    dark: Color(0xFFB76A8D),
+  ),
 ];
 
 BoardPalette boardPaletteById(String id) => boardPalettes.firstWhere(
@@ -52,6 +181,7 @@ class ChessBoard extends StatelessWidget {
     required this.game,
     required this.onSquareTap,
     required this.paletteId,
+    required this.pieceSetId,
     this.selectedSquare,
     this.legalTargets = const <String>{},
     this.lastFrom,
@@ -66,6 +196,7 @@ class ChessBoard extends StatelessWidget {
   final chesslib.Chess game;
   final ValueChanged<String>? onSquareTap;
   final String paletteId;
+  final String pieceSetId;
   final String? selectedSquare;
   final Set<String> legalTargets;
   final String? lastFrom;
@@ -100,6 +231,7 @@ class ChessBoard extends StatelessWidget {
                           _Square(
                             square: '${files[column]}${ranks[row]}',
                             piece: game.get('${files[column]}${ranks[row]}'),
+                            pieceSetId: pieceSetId,
                             size: side,
                             baseColor: (row + column).isEven
                                 ? palette.light
@@ -137,6 +269,7 @@ class _Square extends StatelessWidget {
   const _Square({
     required this.square,
     required this.piece,
+    required this.pieceSetId,
     required this.size,
     required this.baseColor,
     required this.selected,
@@ -150,6 +283,7 @@ class _Square extends StatelessWidget {
 
   final String square;
   final chesslib.Piece? piece;
+  final String pieceSetId;
   final double size;
   final Color baseColor;
   final bool selected;
@@ -205,24 +339,13 @@ class _Square extends StatelessWidget {
                   ),
                 if (piece != null)
                   Center(
-                    child: Text(
-                      _pieceSymbol(piece!),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        height: 1,
-                        fontSize: size * .77,
-                        color: piece!.color == chesslib.Color.WHITE
-                            ? const Color(0xFFFFFBF2)
-                            : const Color(0xFF171310),
-                        shadows: [
-                          Shadow(
-                            color: piece!.color == chesslib.Color.WHITE
-                                ? Colors.black54
-                                : Colors.white54,
-                            offset: const Offset(0, 1),
-                            blurRadius: 1,
-                          ),
-                        ],
+                    child: Padding(
+                      padding: EdgeInsets.all(size * .035),
+                      child: ChessPieceImage(
+                        pieceSetId: pieceSetId,
+                        white: piece!.color == chesslib.Color.WHITE,
+                        type: piece!.type.name,
+                        size: size * .93,
                       ),
                     ),
                   ),
@@ -270,27 +393,6 @@ class _Square extends StatelessWidget {
     return '${_pieceName(piece!)} $color em $square';
   }
 
-  static String _pieceSymbol(chesslib.Piece piece) {
-    const white = {
-      'k': '♔',
-      'q': '♕',
-      'r': '♖',
-      'b': '♗',
-      'n': '♘',
-      'p': '♙',
-    };
-    const black = {
-      'k': '♚',
-      'q': '♛',
-      'r': '♜',
-      'b': '♝',
-      'n': '♞',
-      'p': '♟',
-    };
-    final symbols = piece.color == chesslib.Color.WHITE ? white : black;
-    return symbols[piece.type.name] ?? '';
-  }
-
   static String _pieceName(chesslib.Piece piece) => switch (piece.type.name) {
         'k' => 'Rei',
         'q' => 'Dama',
@@ -300,4 +402,3 @@ class _Square extends StatelessWidget {
         _ => 'Peão',
       };
 }
-

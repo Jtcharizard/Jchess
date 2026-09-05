@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 
 import '../app/app_controller.dart';
 import '../app/app_theme.dart';
+import '../chess/bot_catalog.dart';
 import '../chess/game_models.dart';
 import '../chess/stockfish_service.dart';
 import '../widgets/app_background.dart';
@@ -57,6 +58,8 @@ class _GameScreenState extends State<GameScreen> {
 
   bool get _whiteToMove => _game.turn == chesslib.Color.WHITE;
 
+  BotProfile get _bot => botById(widget.config.botId);
+
   bool get _isBotTurn =>
       widget.config.mode == GameMode.bot &&
       _whiteToMove != widget.config.humanIsWhite &&
@@ -69,6 +72,7 @@ class _GameScreenState extends State<GameScreen> {
   @override
   Widget build(BuildContext context) {
     final boardTheme = context.app.boardTheme;
+    final pieceSet = context.app.pieceSet;
     final topIsWhite = _flipped;
 
     return Scaffold(
@@ -111,6 +115,7 @@ class _GameScreenState extends State<GameScreen> {
                           isWhite: topIsWhite,
                           name: _playerName(topIsWhite),
                           subtitle: _playerSubtitle(topIsWhite),
+                          avatar: _playerAvatar(topIsWhite),
                           active: _whiteToMove == topIsWhite && !_finished,
                           thinking: _thinking && _isBotColor(topIsWhite),
                         ),
@@ -120,6 +125,7 @@ class _GameScreenState extends State<GameScreen> {
                           child: ChessBoard(
                             game: _game,
                             paletteId: boardTheme,
+                            pieceSetId: pieceSet,
                             flipped: _flipped,
                             selectedSquare: _selectedSquare,
                             legalTargets: _selectedMoves
@@ -137,6 +143,7 @@ class _GameScreenState extends State<GameScreen> {
                           isWhite: !topIsWhite,
                           name: _playerName(!topIsWhite),
                           subtitle: _playerSubtitle(!topIsWhite),
+                          avatar: _playerAvatar(!topIsWhite),
                           active: _whiteToMove != topIsWhite && !_finished,
                           thinking: _thinking && _isBotColor(!topIsWhite),
                         ),
@@ -213,18 +220,25 @@ class _GameScreenState extends State<GameScreen> {
     if (widget.config.mode == GameMode.local) {
       return white ? 'Jogador das brancas' : 'Jogador das pretas';
     }
-    return white == widget.config.humanIsWhite ? 'Tu' : 'JChess Bot';
+    return white == widget.config.humanIsWhite ? 'Tu' : _bot.name;
   }
 
   String _playerSubtitle(bool white) {
     if (widget.config.mode == GameMode.bot && _isBotColor(white)) {
-      return 'Stockfish · nível ${widget.config.botLevel}';
+      return 'Stockfish · nível ${widget.config.botLevel}/20';
     }
     return white ? 'Peças brancas' : 'Peças pretas';
   }
 
   bool _isBotColor(bool white) =>
       widget.config.mode == GameMode.bot && white != widget.config.humanIsWhite;
+
+  String _playerAvatar(bool white) {
+    if (widget.config.mode == GameMode.bot && _isBotColor(white)) {
+      return _bot.emoji;
+    }
+    return '';
+  }
 
   void _onSquareTap(String square) {
     if (!_canPlayerMove) return;
@@ -290,15 +304,20 @@ class _GameScreenState extends State<GameScreen> {
         actionsAlignment: MainAxisAlignment.spaceEvenly,
         actions: [
           for (final option in const [
-            ('q', '♛', 'Dama'),
-            ('r', '♜', 'Torre'),
-            ('b', '♝', 'Bispo'),
-            ('n', '♞', 'Cavalo'),
+            ('q', 'Dama'),
+            ('r', 'Torre'),
+            ('b', 'Bispo'),
+            ('n', 'Cavalo'),
           ])
             IconButton(
-              tooltip: option.$3,
+              tooltip: option.$2,
               onPressed: () => Navigator.pop(context, option.$1),
-              icon: Text(option.$2, style: const TextStyle(fontSize: 34)),
+              icon: ChessPieceImage(
+                pieceSetId: context.app.pieceSet,
+                white: _whiteToMove,
+                type: option.$1,
+                size: 40,
+              ),
             ),
         ],
       ),
@@ -369,7 +388,7 @@ class _GameScreenState extends State<GameScreen> {
       final move = await _engine.bestMove(
         _game.fen,
         skillLevel: widget.config.botLevel,
-        moveTimeMs: 280 + widget.config.botLevel * 45,
+        moveTimeMs: _bot.thinkTimeMs,
       );
       if (!mounted || move == null || move.length < 4) return;
       final from = move.substring(0, 2);
@@ -566,6 +585,7 @@ class _PlayerStrip extends StatelessWidget {
     required this.isWhite,
     required this.name,
     required this.subtitle,
+    required this.avatar,
     required this.active,
     required this.thinking,
   });
@@ -573,6 +593,7 @@ class _PlayerStrip extends StatelessWidget {
   final bool isWhite;
   final String name;
   final String subtitle;
+  final String avatar;
   final bool active;
   final bool thinking;
 
@@ -599,13 +620,14 @@ class _PlayerStrip extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             alignment: Alignment.center,
-            child: Text(
-              isWhite ? '♔' : '♚',
-              style: TextStyle(
-                color: isWhite ? Colors.black87 : Colors.white,
-                fontSize: 27,
-              ),
-            ),
+            child: avatar.isNotEmpty
+                ? Text(avatar, style: const TextStyle(fontSize: 23))
+                : ChessPieceImage(
+                    pieceSetId: context.app.pieceSet,
+                    white: isWhite,
+                    type: 'k',
+                    size: 33,
+                  ),
           ),
           const SizedBox(width: 11),
           Expanded(

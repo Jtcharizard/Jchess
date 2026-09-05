@@ -57,12 +57,12 @@ jobs:
         run: flutter build apk --release --target-platform android-arm64
 
       - name: Preparar arquivo final
-        run: cp build/app/outputs/flutter-apk/app-release.apk JChess-v0.1.0-arm64.apk
+        run: cp build/app/outputs/flutter-apk/app-release.apk JChess-v0.2.0-arm64.apk
 
       - name: Disponibilizar APK
         uses: actions/upload-artifact@v4
         with:
-          name: JChess-APK-v0.1.0-arm64
-          path: JChess-v0.1.0-arm64.apk
+          name: JChess-APK-v0.2.0-arm64
+          path: JChess-v0.2.0-arm64.apk
           retention-days: 30
           if-no-files-found: error

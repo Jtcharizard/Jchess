@@ -19,3 +19,20 @@ licenças BSD-2-Clause e MIT.
 
 - Projeto: https://github.com/davecom/chess.dart
 
+## flutter_svg
+
+Os conjuntos de peças em SVG são exibidos com `flutter_svg`, distribuído sob
+a licença MIT.
+
+- Projeto: https://pub.dev/packages/flutter_svg
+
+## Conjuntos de peças
+
+Os SVGs abaixo são distribuídos com o código-fonte, sem alteração, a partir do
+repositório aberto do Lichess:
+
+- **Chessnut**, por Alexis Luengas — Apache License 2.0.
+- **Fantasy**, **Spatial** e **Celtic**, por Maurizio Monge — MIT.
+- **RhosGFX**, por RhosGFX — CC0 1.0.
+
+Origem e créditos: https://github.com/lichess-org/lila/blob/master/COPYING.md

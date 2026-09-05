@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../app/app_controller.dart';
 import '../app/app_theme.dart';
+import '../chess/bot_catalog.dart';
 import '../chess/game_models.dart';
 import 'game_screen.dart';
 
@@ -99,10 +100,10 @@ class HomeScreen extends StatelessWidget {
       isScrollControlled: true,
       backgroundColor: const Color(0xFF211B17),
       showDragHandle: true,
-      builder: (_) => _GameSetupSheet(initialLevel: context.app.botLevel),
+      builder: (_) => _GameSetupSheet(initialBotId: context.app.botId),
     );
     if (config == null || !context.mounted) return;
-    await context.app.setBotLevel(config.botLevel);
+    await context.app.setBot(config.botId, config.botLevel);
     if (!context.mounted) return;
     await Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => GameScreen(config: config)),
@@ -117,6 +118,7 @@ class HomeScreen extends StatelessWidget {
             mode: GameMode.local,
             humanIsWhite: true,
             botLevel: 0,
+            botId: 'local',
           ),
         ),
       ),
@@ -176,7 +178,7 @@ class _BrandHeader extends StatelessWidget {
           onPressed: () => showAboutDialog(
             context: context,
             applicationName: 'JChess',
-            applicationVersion: '0.1.0',
+            applicationVersion: '0.2.0',
             applicationIcon: const Text('♞', style: TextStyle(fontSize: 42)),
             children: const [
               Text('Xadrez offline, educativo e personalizável.'),
@@ -403,27 +405,27 @@ class _FeatureRow extends StatelessWidget {
 }
 
 class _GameSetupSheet extends StatefulWidget {
-  const _GameSetupSheet({required this.initialLevel});
+  const _GameSetupSheet({required this.initialBotId});
 
-  final int initialLevel;
+  final String initialBotId;
 
   @override
   State<_GameSetupSheet> createState() => _GameSetupSheetState();
 }
 
 class _GameSetupSheetState extends State<_GameSetupSheet> {
-  late double _level;
+  late String _selectedBotId;
   SideChoice _side = SideChoice.white;
 
   @override
   void initState() {
     super.initState();
-    _level = widget.initialLevel.toDouble();
+    _selectedBotId = botById(widget.initialBotId).id;
   }
 
   @override
   Widget build(BuildContext context) {
-    final level = _level.round();
+    final selectedBot = botById(_selectedBotId);
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(22, 4, 22, 24),
@@ -437,13 +439,16 @@ class _GameSetupSheetState extends State<_GameSetupSheet> {
             ),
             const SizedBox(height: 6),
             const Text(
-              'Tu escolhe a cor e o quanto o Stockfish vai te odiar.',
+              'Escolhe teu adversário e depois decide a cor.',
               style: TextStyle(color: Colors.white60),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             Row(
               children: [
-                const Text('Força do bot', style: TextStyle(fontWeight: FontWeight.w800)),
+                const Text(
+                  'Elenco de bots',
+                  style: TextStyle(fontWeight: FontWeight.w900),
+                ),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
@@ -452,21 +457,30 @@ class _GameSetupSheetState extends State<_GameSetupSheet> {
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    'Nível $level · ${_levelName(level)}',
+                    'Nível ${selectedBot.level}/20',
                     style: const TextStyle(color: emberOrange, fontWeight: FontWeight.w900),
                   ),
                 ),
               ],
             ),
-            Slider(
-              value: _level,
-              min: 0,
-              max: 20,
-              divisions: 20,
-              label: '$level',
-              onChanged: (value) => setState(() => _level = value),
+            const SizedBox(height: 11),
+            SizedBox(
+              height: 158,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: botCatalog.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 9),
+                itemBuilder: (context, index) {
+                  final bot = botCatalog[index];
+                  return _BotCard(
+                    bot: bot,
+                    selected: bot.id == _selectedBotId,
+                    onTap: () => setState(() => _selectedBotId = bot.id),
+                  );
+                },
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             const Text('Tua cor', style: TextStyle(fontWeight: FontWeight.w800)),
             const SizedBox(height: 10),
             SizedBox(
@@ -493,7 +507,12 @@ class _GameSetupSheetState extends State<_GameSetupSheet> {
                   };
                   Navigator.pop(
                     context,
-                    GameConfig(mode: GameMode.bot, humanIsWhite: white, botLevel: level),
+                    GameConfig(
+                      mode: GameMode.bot,
+                      humanIsWhite: white,
+                      botLevel: selectedBot.level,
+                      botId: selectedBot.id,
+                    ),
                   );
                 },
                 icon: const Icon(Icons.play_arrow_rounded),
@@ -506,11 +525,59 @@ class _GameSetupSheetState extends State<_GameSetupSheet> {
     );
   }
 
-  String _levelName(int level) {
-    if (level <= 3) return 'Tranquilo';
-    if (level <= 7) return 'Esperto';
-    if (level <= 12) return 'Cascudo';
-    if (level <= 17) return 'Brutal';
-    return 'Sem piedade';
+}
+
+class _BotCard extends StatelessWidget {
+  const _BotCard({
+    required this.bot,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final BotProfile bot;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(19),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        width: 126,
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: selected
+              ? emberOrange.withValues(alpha: .16)
+              : Colors.white.withValues(alpha: .045),
+          borderRadius: BorderRadius.circular(19),
+          border: Border.all(
+            color: selected ? emberOrange : Colors.white10,
+            width: selected ? 2 : 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(bot.emoji, style: const TextStyle(fontSize: 32)),
+            const Spacer(),
+            Text(
+              bot.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontWeight: FontWeight.w900),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              bot.tagline,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(color: Colors.white54, fontSize: 10),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

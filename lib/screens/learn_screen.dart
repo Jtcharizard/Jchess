@@ -78,11 +78,24 @@ class LearnScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           const Text(
-            'Trilha iniciante',
+            'Trilha completa',
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 3),
+          const Text(
+            'Do primeiro movimento aos padrões de tática e final.',
+            style: TextStyle(color: Colors.white54, fontSize: 12),
           ),
           const SizedBox(height: 12),
           for (var index = 0; index < lessonCatalog.length; index++) ...[
+            if (_chapterTitle(index) != null) ...[
+              if (index != 0) const SizedBox(height: 18),
+              _ChapterHeader(
+                number: _chapterNumber(index),
+                title: _chapterTitle(index)!,
+              ),
+              const SizedBox(height: 9),
+            ],
             _LessonTile(
               index: index,
               lesson: lessonCatalog[index],
@@ -95,6 +108,61 @@ class LearnScreen extends StatelessWidget {
           ],
         ],
       ),
+    );
+  }
+}
+
+String? _chapterTitle(int index) => switch (index) {
+      0 => 'Movimentos e capturas',
+      6 => 'Xeque e regras especiais',
+      11 => 'Táticas que ganham material',
+      17 => 'Promoção e finais',
+      20 => 'Abertura e golpes avançados',
+      _ => null,
+    };
+
+int _chapterNumber(int index) => switch (index) {
+      0 => 1,
+      6 => 2,
+      11 => 3,
+      17 => 4,
+      _ => 5,
+    };
+
+class _ChapterHeader extends StatelessWidget {
+  const _ChapterHeader({required this.number, required this.title});
+
+  final int number;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+          decoration: BoxDecoration(
+            color: emberOrange.withValues(alpha: .15),
+            borderRadius: BorderRadius.circular(99),
+          ),
+          child: Text(
+            'CAPÍTULO $number',
+            style: const TextStyle(
+              color: emberOrange,
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: .7,
+            ),
+          ),
+        ),
+        const SizedBox(width: 9),
+        Expanded(
+          child: Text(
+            title,
+            style: const TextStyle(fontWeight: FontWeight.w900),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -168,4 +236,3 @@ class _LessonTile extends StatelessWidget {
     );
   }
 }
-
