@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:jchess/app/app_controller.dart';
 import 'package:jchess/chess/game_models.dart';
@@ -15,6 +16,7 @@ void main() {
     await tester.scrollUntilVisible(
       find.text('Teu estilo de jogo'),
       450,
+      scrollable: find.byType(Scrollable).first,
     );
     await tester.pumpAndSettle();
 
