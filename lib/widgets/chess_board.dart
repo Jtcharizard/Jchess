@@ -65,6 +65,31 @@ const pieceSets = <PieceSet>[
     name: 'Totoy',
     description: 'Minimalista e ousado',
   ),
+  PieceSet(
+    id: 'neon',
+    name: 'Neon',
+    description: 'Ciano e rosa elétricos',
+  ),
+  PieceSet(
+    id: 'shahi-ivory-brown',
+    name: 'Madeira 3D',
+    description: 'Marfim e madeira esculpida',
+  ),
+  PieceSet(
+    id: 'pirouetti',
+    name: 'Caligrafia',
+    description: 'Curvas leves e modernas',
+  ),
+  PieceSet(
+    id: 'letter',
+    name: 'Letras',
+    description: 'Identificação instantânea',
+  ),
+  PieceSet(
+    id: 'firi',
+    name: 'Dragão',
+    description: 'Fantasia sombria e marcante',
+  ),
 ];
 
 PieceSet pieceSetById(String id) => pieceSets.firstWhere(

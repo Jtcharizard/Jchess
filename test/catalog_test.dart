@@ -15,6 +15,7 @@ void main() {
   });
 
   test('cada tema possui o conjunto completo de peças', () {
+    expect(pieceSets, hasLength(15));
     const colors = ['w', 'b'];
     const types = ['K', 'Q', 'R', 'B', 'N', 'P'];
 

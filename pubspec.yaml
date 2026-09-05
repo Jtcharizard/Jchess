@@ -37,6 +37,11 @@ flutter:
     - assets/pieces/pixel/
     - assets/pieces/shapes/
     - assets/pieces/totoy/
+    - assets/pieces/neon/
+    - assets/pieces/shahi-ivory-brown/
+    - assets/pieces/pirouetti/
+    - assets/pieces/letter/
+    - assets/pieces/firi/
 
 flutter_launcher_icons:
   android: true

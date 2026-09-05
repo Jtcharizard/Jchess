@@ -39,5 +39,13 @@ repositório aberto do Lichess:
 - **Pixel**, por therealqtpi — AGPL-3.0-or-later.
 - **Shapes**, por flugsio — CC BY-SA 4.0.
 - **Totoy**, por Kosal Sen — CC BY 4.0.
+- **Firi**, por James Faure — CC BY 4.0.
+- **Letter**, por usolando — AGPL-3.0-or-later.
+- **Pirouetti**, por pirouetti — AGPL-3.0-or-later.
+- **Cburnett/Neon**, por Colin M.L. Burnett — GPL-2.0-or-later; as
+  cores foram adaptadas pelo projeto JChess.
+- **Shahi Ivory/Brown**, por Tamer Karatekin — Shahi Chess & Shatranj Font
+  License 1.0. Os arquivos são distribuídos sem modificação; a licença
+  completa está em `licenses/SHAHI_CHESS_LICENSE.txt`.
 
 Origem e créditos: https://github.com/lichess-org/lila/blob/master/COPYING.md
