@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../app/app_controller.dart';
 import '../app/app_theme.dart';
 import '../chess/game_models.dart';
+import '../chess/gameplay_profile.dart';
 import '../chess/stockfish_service.dart';
 import '../widgets/app_background.dart';
 import '../widgets/chess_board.dart';
@@ -86,6 +87,21 @@ class _AnalysisScreenState extends State<AnalysisScreen> {
           _analysis.add(analyzed);
           _selectedIndex = _analysis.length - 1;
         });
+      }
+      if (!_cancelled &&
+          mounted &&
+          widget.versusBot &&
+          _analysis.length == widget.moves.length) {
+        try {
+          await context.app.recordGameplayAnalysis(
+            summarizeGameplay(
+              analysis: _analysis,
+              humanIsWhite: widget.humanIsWhite,
+            ),
+          );
+        } catch (_) {
+          // A revisão continua útil mesmo se o histórico não puder ser salvo.
+        }
       }
     } catch (_) {
       if (mounted) {

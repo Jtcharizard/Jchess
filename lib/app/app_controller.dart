@@ -4,6 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../chess/game_models.dart';
+import '../chess/gameplay_profile.dart';
 
 enum GameResult { win, draw, loss, local }
 
@@ -20,6 +21,8 @@ class AppController extends ChangeNotifier {
   static const _drawsKey = 'draws';
   static const _lossesKey = 'losses';
   static const _activeGameKey = 'activeGame';
+  static const _gameplayProfileKey = 'gameplayProfile';
+  static const _analyzedGamesKey = 'analyzedGameFingerprints';
 
   SharedPreferences? _preferences;
 
@@ -35,6 +38,8 @@ class AppController extends ChangeNotifier {
   int draws = 0;
   int losses = 0;
   SavedGame? activeGame;
+  GameplayProfile gameplayProfile = const GameplayProfile();
+  List<String> _analyzedGameFingerprints = <String>[];
 
   Future<void> load() async {
     _preferences = await SharedPreferences.getInstance();
@@ -55,6 +60,18 @@ class AppController extends ChangeNotifier {
     wins = preferences.getInt(_winsKey) ?? 0;
     draws = preferences.getInt(_drawsKey) ?? 0;
     losses = preferences.getInt(_lossesKey) ?? 0;
+    final gameplayJson = preferences.getString(_gameplayProfileKey);
+    if (gameplayJson != null) {
+      try {
+        gameplayProfile = GameplayProfile.fromJson(
+          Map<String, dynamic>.from(jsonDecode(gameplayJson) as Map),
+        );
+      } catch (_) {
+        gameplayProfile = const GameplayProfile();
+      }
+    }
+    _analyzedGameFingerprints =
+        preferences.getStringList(_analyzedGamesKey) ?? <String>[];
     final savedGameJson = preferences.getString(_activeGameKey);
     if (savedGameJson != null) {
       try {
@@ -159,6 +176,34 @@ class AppController extends ChangeNotifier {
       _preferences?.setInt(_winsKey, wins) ?? Future.value(true),
       _preferences?.setInt(_drawsKey, draws) ?? Future.value(true),
       _preferences?.setInt(_lossesKey, losses) ?? Future.value(true),
+    ]);
+  }
+
+  Future<void> recordGameplayAnalysis(GameplaySummary summary) async {
+    if (summary.analyzedMoves == 0 ||
+        _analyzedGameFingerprints.contains(summary.fingerprint)) {
+      return;
+    }
+    _analyzedGameFingerprints.add(summary.fingerprint);
+    if (_analyzedGameFingerprints.length > 80) {
+      _analyzedGameFingerprints.removeRange(
+        0,
+        _analyzedGameFingerprints.length - 80,
+      );
+    }
+    gameplayProfile = gameplayProfile.merge(summary);
+    notifyListeners();
+    await Future.wait([
+      _preferences?.setString(
+            _gameplayProfileKey,
+            jsonEncode(gameplayProfile.toJson()),
+          ) ??
+          Future.value(true),
+      _preferences?.setStringList(
+            _analyzedGamesKey,
+            _analyzedGameFingerprints,
+          ) ??
+          Future.value(true),
     ]);
   }
 }

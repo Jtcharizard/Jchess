@@ -16,7 +16,7 @@
   <a href="../../actions/workflows/android.yml"><img alt="Build Android" src="../../actions/workflows/android.yml/badge.svg"></a>
 </p>
 
-## O que já existe na v0.4
+## O que já existe na v0.4.1
 
 - Dez bots com nome, retrato próprio, personalidade visual e forças de 0 a 20, todos movidos
   pelo **Stockfish 18** offline.
@@ -33,6 +33,8 @@
   incluindo a arte da Tokai Teio.
 - Upload de wallpaper direto da galeria do celular.
 - Estatísticas e progresso das lições salvos no aparelho.
+- Perfil de gameplay baseado nas revisões: precisão geral, fase mais forte,
+  erro recorrente, segurança da rainha e frequência de roque.
 - Exportação da partida em PGN para a área de transferência.
 
 ## APK pelo celular
@@ -42,8 +44,8 @@ O próprio GitHub compila o aplicativo:
 1. Abra a aba **Actions** deste repositório.
 2. Entre em **Android • Gerar APK**.
 3. Toque em **Run workflow**.
-4. Quando terminar, baixe o artefato **JChess-APK-v0.4.0-arm64**.
-5. Extraia o arquivo e instale `JChess-v0.4.0-arm64.apk`.
+4. Quando terminar, baixe o artefato **JChess-APK-v0.4.1-arm64**.
+5. Extraia o arquivo e instale `JChess-v0.4.1-arm64.apk`.
 
 O APK é ARM64 para não carregar três cópias gigantes do Stockfish. Essa é a
 arquitetura usada pela imensa maioria dos celulares Android atuais.

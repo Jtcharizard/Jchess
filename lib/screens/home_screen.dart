@@ -6,6 +6,7 @@ import '../app/app_controller.dart';
 import '../app/app_theme.dart';
 import '../chess/bot_catalog.dart';
 import '../chess/game_models.dart';
+import '../chess/gameplay_profile.dart';
 import '../widgets/bot_portrait.dart';
 import 'game_screen.dart';
 
@@ -76,28 +77,7 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(height: 12),
           _StatsCard(app: app),
           const SizedBox(height: 24),
-          const Text(
-            'O que já está entrando',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
-          ),
-          const SizedBox(height: 12),
-          const _FeatureRow(
-            icon: Icons.psychology_alt_rounded,
-            title: 'Stockfish offline',
-            text: 'Bot ajustável do nível 0 ao 20.',
-          ),
-          const SizedBox(height: 10),
-          const _FeatureRow(
-            icon: Icons.lightbulb_rounded,
-            title: 'Dicas de verdade',
-            text: 'Mostra um lance forte quando tu empacar.',
-          ),
-          const SizedBox(height: 10),
-          const _FeatureRow(
-            icon: Icons.analytics_rounded,
-            title: 'Análise lance por lance',
-            text: 'Melhor lance, erros, precisão e explicação simples.',
-          ),
+          _GameplayInsights(profile: app.gameplayProfile),
         ],
       ),
     );
@@ -219,7 +199,7 @@ class _BrandHeader extends StatelessWidget {
           onPressed: () => showAboutDialog(
             context: context,
             applicationName: 'JChess',
-            applicationVersion: '0.4.0',
+            applicationVersion: '0.4.1',
             applicationIcon: Image.asset(
               'assets/branding/app_icon.png',
               width: 54,
@@ -550,42 +530,228 @@ class _Stat extends StatelessWidget {
   }
 }
 
-class _FeatureRow extends StatelessWidget {
-  const _FeatureRow({required this.icon, required this.title, required this.text});
+class _GameplayInsights extends StatelessWidget {
+  const _GameplayInsights({required this.profile});
+
+  final GameplayProfile profile;
+
+  @override
+  Widget build(BuildContext context) {
+    if (profile.analyzedGames == 0) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Teu estilo de jogo',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(18),
+              child: Row(
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: emberOrange.withValues(alpha: .15),
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: const Icon(
+                      Icons.psychology_rounded,
+                      color: emberOrange,
+                    ),
+                  ),
+                  const SizedBox(width: 13),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Ainda estou te estudando',
+                          style: TextStyle(fontWeight: FontWeight.w900),
+                        ),
+                        SizedBox(height: 3),
+                        Text(
+                          'Termina uma partida contra bot e abre a revisão completa para liberar teus padrões.',
+                          style: TextStyle(
+                            color: Colors.white60,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    final phase = profile.strongestPhase;
+    final strongMoves = profile.bestMoves + profile.excellentMoves;
+    var errorTitle = 'Nenhum vício claro';
+    var errorText = 'Ainda não apareceu um erro recorrente nas tuas revisões.';
+    var errorIcon = Icons.verified_rounded;
+    var errorColor = Colors.greenAccent;
+    final errorCounts = <String, int>{
+      'Imprecisões': profile.inaccuracies,
+      'Erros': profile.mistakes,
+      'Erros graves': profile.blunders,
+    };
+    final commonError = errorCounts.entries.reduce(
+      (current, next) => next.value > current.value ? next : current,
+    );
+    if (commonError.value > 0) {
+      errorTitle = 'Mais comum: ${commonError.key.toLowerCase()}';
+      errorText = '${commonError.value} ocorrências em ${profile.analyzedGames} '
+          '${profile.analyzedGames == 1 ? 'partida analisada' : 'partidas analisadas'}.';
+      errorIcon = commonError.key == 'Erros graves'
+          ? Icons.warning_amber_rounded
+          : Icons.manage_search_rounded;
+      errorColor = commonError.key == 'Erros graves'
+          ? Colors.redAccent
+          : Colors.amberAccent;
+    }
+
+    final queenInTrouble = profile.queenErrors > 0;
+    final castlingPercent = (profile.castlingRate * 100).round();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Expanded(
+              child: Text(
+                'Teu estilo de jogo',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
+              ),
+            ),
+            Text(
+              '${profile.analyzedGames} ${profile.analyzedGames == 1 ? 'revisão' : 'revisões'}',
+              style: const TextStyle(color: Colors.white54, fontSize: 11),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+            child: Column(
+              children: [
+                _InsightRow(
+                  icon: Icons.track_changes_rounded,
+                  color: emberOrange,
+                  title: 'Precisão geral: ${profile.accuracy.round()}%',
+                  text: '$strongMoves lances excelentes em '
+                      '${profile.analyzedMoves} decisões.',
+                ),
+                const Divider(height: 1, color: Colors.white10),
+                if (phase != null) ...[
+                  _InsightRow(
+                    icon: Icons.military_tech_rounded,
+                    color: const Color(0xFF8BC8FF),
+                    title: 'Melhor fase: ${phase.label}',
+                    text: 'Tu está acertando ${phase.score.round()}% das '
+                        'posições dessa fase.',
+                  ),
+                  const Divider(height: 1, color: Colors.white10),
+                ],
+                _InsightRow(
+                  icon: errorIcon,
+                  color: errorColor,
+                  title: errorTitle,
+                  text: errorText,
+                ),
+                const Divider(height: 1, color: Colors.white10),
+                _InsightRow(
+                  icon: queenInTrouble
+                      ? Icons.heart_broken_rounded
+                      : Icons.favorite_rounded,
+                  color: queenInTrouble
+                      ? Colors.pinkAccent
+                      : Colors.greenAccent,
+                  title: queenInTrouble
+                      ? 'A rainha tá sofrendo'
+                      : 'Rainha sob controle',
+                  text: queenInTrouble
+                      ? '${profile.queenErrors} lances ruins com a rainha. '
+                          'Calcula a fuga antes de avançar.'
+                      : 'Nenhum erro sério com a rainha nas partidas analisadas.',
+                ),
+                const Divider(height: 1, color: Colors.white10),
+                _InsightRow(
+                  icon: Icons.shield_rounded,
+                  color: castlingPercent >= 60
+                      ? Colors.greenAccent
+                      : Colors.amberAccent,
+                  title: castlingPercent >= 60
+                      ? 'Rei geralmente seguro'
+                      : 'Tu esquece o roque',
+                  text: 'Roque feito em $castlingPercent% das partidas analisadas.',
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _InsightRow extends StatelessWidget {
+  const _InsightRow({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.text,
+  });
 
   final IconData icon;
+  final Color color;
   final String title;
   final String text;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(15),
-        child: Row(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: emberOrange.withValues(alpha: .15),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Icon(icon, color: emberOrange),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 13),
+      child: Row(
+        children: [
+          Container(
+            width: 42,
+            height: 42,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: .14),
+              borderRadius: BorderRadius.circular(13),
             ),
-            const SizedBox(width: 13),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w900)),
-                  const SizedBox(height: 2),
-                  Text(text, style: const TextStyle(color: Colors.white60, fontSize: 12)),
-                ],
-              ),
+            child: Icon(icon, color: color, size: 21),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  text,
+                  style: const TextStyle(
+                    color: Colors.white60,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

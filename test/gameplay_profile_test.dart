@@ -1,0 +1,107 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:jchess/app/app_controller.dart';
+import 'package:jchess/chess/game_models.dart';
+import 'package:jchess/chess/gameplay_profile.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+void main() {
+  const initialFen =
+      'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
+  const castleFen = '4k3/8/8/8/8/8/8/4K2R w K - 0 1';
+
+  AnalyzedMove analyzed({
+    required String from,
+    required String to,
+    required String san,
+    required String beforeFen,
+    required bool whiteMoved,
+    required MoveQuality quality,
+  }) {
+    return AnalyzedMove(
+      move: PlayedMove(
+        beforeFen: beforeFen,
+        afterFen: beforeFen,
+        from: from,
+        to: to,
+        uci: '$from$to',
+        san: san,
+        whiteMoved: whiteMoved,
+      ),
+      quality: quality,
+      lossCp: quality == MoveQuality.blunder ? 400 : 15,
+      scoreAfterWhite: 0,
+      bestMove: null,
+      explanation: '',
+    );
+  }
+
+  test('resume padrões apenas dos lances do jogador', () {
+    final summary = summarizeGameplay(
+      humanIsWhite: true,
+      analysis: [
+        analyzed(
+          from: 'd1',
+          to: 'h5',
+          san: 'Qh5',
+          beforeFen: initialFen,
+          whiteMoved: true,
+          quality: MoveQuality.blunder,
+        ),
+        analyzed(
+          from: 'e7',
+          to: 'e5',
+          san: 'e5',
+          beforeFen: initialFen,
+          whiteMoved: false,
+          quality: MoveQuality.mistake,
+        ),
+        analyzed(
+          from: 'e1',
+          to: 'g1',
+          san: 'O-O',
+          beforeFen: castleFen,
+          whiteMoved: true,
+          quality: MoveQuality.excellent,
+        ),
+      ],
+    );
+
+    expect(summary.analyzedMoves, 2);
+    expect(summary.blunders, 1);
+    expect(summary.mistakes, 0);
+    expect(summary.excellentMoves, 1);
+    expect(summary.queenErrors, 1);
+    expect(summary.castled, isTrue);
+    expect(summary.openingMoves, 2);
+  });
+
+  test('não contabiliza a mesma revisão duas vezes e persiste o perfil', () async {
+    SharedPreferences.setMockInitialValues({});
+    final controller = AppController();
+    await controller.load();
+    final summary = summarizeGameplay(
+      humanIsWhite: true,
+      analysis: [
+        analyzed(
+          from: 'd1',
+          to: 'h5',
+          san: 'Qh5',
+          beforeFen: initialFen,
+          whiteMoved: true,
+          quality: MoveQuality.blunder,
+        ),
+      ],
+    );
+
+    await controller.recordGameplayAnalysis(summary);
+    await controller.recordGameplayAnalysis(summary);
+
+    expect(controller.gameplayProfile.analyzedGames, 1);
+    expect(controller.gameplayProfile.queenErrors, 1);
+
+    final restored = AppController();
+    await restored.load();
+    expect(restored.gameplayProfile.analyzedGames, 1);
+    expect(restored.gameplayProfile.blunders, 1);
+  });
+}

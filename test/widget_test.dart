@@ -11,6 +11,8 @@ void main() {
     expect(find.text('JCHESS'), findsOneWidget);
     expect(find.text('Nova partida'), findsOneWidget);
     expect(find.text('Aprender'), findsOneWidget);
+    expect(find.text('Teu estilo de jogo'), findsOneWidget);
+    expect(find.text('O que já está entrando'), findsNothing);
   });
 
   testWidgets('mostra atalho para continuar a partida salva', (tester) async {
